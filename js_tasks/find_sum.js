@@ -43,7 +43,7 @@ function sostavChisla(massivChisel, chislo) {
  * This one is handled with recursion
  * Ask ChatGPT to explain step by step process of recursion Descent and Ascent
  * Imagine you run it like this: sostavChisla([8, 1, 2, 6, 7, 1], 10)
- * */
+ */
 
 // Below is a code for tests. Do not change !
 function compareNumericArrays(arr1, arr2) {
