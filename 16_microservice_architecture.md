@@ -175,7 +175,7 @@ Protobuf in practice:
 - Implement service in code
 - Implement client in code
 
-.proto file:
+**.proto file**:
 
 ```
 syntax = "proto3";
