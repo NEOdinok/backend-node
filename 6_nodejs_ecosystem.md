@@ -366,6 +366,30 @@ obj = null; // ❌ still in memory because `map` holds a strong reference
 
 **Use case**: control `this` context
 
+## Regular functions vs Arrow functions
+
+Arrow function. Introduced in ES6
+
+```ts
+const add = (a, b) => a + b;
+```
+
+Regular function.
+
+```ts
+function add(a, b) {
+  return a + b;
+}
+```
+
+| 🔍 Key Differences     | Arrow Function (`=>`)                               | Regular Function                                         |
+| ---------------------- | --------------------------------------------------- | -------------------------------------------------------- |
+| **Syntax**             | ✅ Shorter, inline                                  | ❌ More verbose                                          |
+| **`this` binding**     | Inherits context from surrounding context (lexical) | ❌ Has its own `this` captured from where it was created |
+| **Constructor usage**  | ❌ Cannot be used as a constructor                  | ✅ Can be used as a constructor                          |
+| **`arguments` object** | ❌ Not available                                    | ✅ Available                                             |
+| **Hoisting**           | ❌ Not hoisted (must be defined before use)         | ✅ Hoisted (can be used before definition)               |
+
 ## Function & Class Hoisting
 
 ### Function declaration
