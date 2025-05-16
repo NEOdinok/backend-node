@@ -22,7 +22,7 @@ Implemented `tag-based` filtering and ranking system functionality that boosted 
 
 ## Geeks Ltd
 
-`Prometheus` and `Sentry` for real time monitoring.
+`Prometheus` and `Grafana` for real time monitoring.
 Reduced error detection time **from 50 to 11 minutes**, spent lot of time onboarding newcomers, wrote documentation, conducted
 one-on-one meetings and as a result shortened onboarding time from 90 to 30 days.
 
@@ -50,7 +50,7 @@ I’m looking for a strong engineering team and impactful product. Happy to conn
 
 ## Опыт в Geeks Ltd
 
-Интегрировал системы мониторинга `Prometheus` и `Sentry` для реального времени.  
+Интегрировал системы мониторинга `Prometheus` и `Grafana` для реального времени.  
 Сократил время обнаружения ошибок **с 50 до 11 минут**.  
 Активно занимался онбордингом новых сотрудников: писал документацию, проводил one-on-one встречи,  
 что позволило сократить время вливания в команду **с 90 до 30 дней**.
