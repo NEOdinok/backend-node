@@ -244,9 +244,9 @@ let y = 10;
 
 - `Promise.resolve(value)` → returns a resolved Promise with `value`.
 - `Promise.reject(error)` → returns a rejected Promise with `error`.
-- `Promise.all([...])` → waits for all to **resolve**, fails fast if any **rejects**.
+- `Promise.all([...])` → waits for all to **resolve**, **keeps order**, fails fast if any **rejects**.
 - `Promise.race([...])` → resolves/rejects with the **first settled** Promise.
-- `Promise.allSettled([...])` → waits for all, returns array of `{ status, value | reason }`.
+- `Promise.allSettled([...])` → waits for all, **keeps the order**, returns array of `{ status, value | reason }`, .
 
 ---
 
