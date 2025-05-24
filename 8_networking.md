@@ -51,6 +51,31 @@ The **TCP/IP stack** is a set of protocols that enable communication over the in
 | Internet (IP)     | Routing, addressing    | IP, ICMP             |
 | Network Interface | Hardware communication | Ethernet, Wi-Fi      |
 
+## 🌐 HTTP vs HTTPS
+
+- **HTTPS** is typically configured via **Nginx** or **Apache**
+- **Default ports:**
+  - `HTTP`: **80**
+  - `HTTPS`: **443**
+
+### 🔐 TLS Certificates
+
+To enable HTTPS, your server needs a **TLS certificate**, which can be:
+
+### ✅ Public (CA-signed)
+
+- Issued by trusted Certificate Authorities:
+  - **Let’s Encrypt** (free)
+  - **Cloudflare**
+  - **Sectigo**, and others
+- **Required for production**
+
+### 🧪 Self-Signed
+
+- Used **only for local development**
+- Can be generated via `openssl`
+- ⚠️ **Not trusted by browsers** — will show _"Connection is not secure"_
+
 ## TCP vs UDP
 
 | Feature        | TCP                            | UDP                          |
