@@ -1,6 +1,6 @@
 # RabbitMQ
 
-> **AMQP** - Advanced Message Queuing Protocol
+> **AMQP** - Advanced Message Queuing Protocol. Built **on top of TCP**.
 
 **RabbitMQ** is a message broker that offers a flexible and reliable system for transmitting messages between systems.  
 It supports the **AMQP protocol**.
@@ -33,6 +33,17 @@ producers (publishers) → Exchange → Queue
 - ❌ **No by default**
 - Messages in a **single queue** are delivered in order
 - To ensure order: use **"one queue per consumer"** pattern. Each consumer processes messages from it's own queue
+
+## 📡 Channels in RabbitMQ
+
+**Channels** are virtual connections inside a single TCP connection to the RabbitMQ.
+
+- Created and managed using the AMQP protocol.
+- Multiple channels can be opened per connection.
+- Used to isolate different operations (e.g., publishing vs consuming) in the same connection.
+- Lightweight and fast – avoids the overhead of opening multiple TCP connections.
+
+> ⚠️ It's important to never share a channel between producers and consumers. Always create separate channels for each logical responsibility.
 
 ## 💾 Durable Messaging
 

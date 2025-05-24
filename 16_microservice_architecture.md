@@ -35,7 +35,7 @@ Used in backend applications to distribute incoming traffic evenly across multip
 - **cluster** - Node.js built-in module that lets use spawn multiple NodeJS processes.
 - **amqplib + cluster** = parallel processing. Load balancing is handled automatically by NodeJS.
 - **Nginx** - used for load balancing. Supports all 3: Round Robin, Least Connections, IP Hash.
-- **Async Saga** - Asynchronous Saga pattern means compensating actions that happen asynchronously in a distriburted system to undo some actions.
+- **Async Saga** - Asynchronous Saga pattern means compensating actions that happen asynchronously in a distributed system to undo some actions.
   Example:  
   Place order → charge → reserve product → send notification.  
   If reserving the product fails, the saga rolls back:  
