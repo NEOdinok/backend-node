@@ -2,11 +2,16 @@
 
 ## [Fireship video](https://www.youtube.com/watch?v=1BfCnjr_Vjg)
 
+WebSockets are built on top of HTTP
+
 - **Persistent two-way connection** between client and server.
 - Uses **TCP**, starts as HTTP then upgrades.
 - Protocols:
   - `ws://` → insecure
   - `wss://` → secure (via SSL/TLS)
+
+> **TSL** is contemporary version of SSL
+> **ws:/**/ uses PORT `80`, **wss://** uses PORT `443` (Same as HTTP)
 
 ### Advantages over HTTP
 
