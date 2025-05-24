@@ -1,4 +1,4 @@
-# Introduction
+# Database Introduction
 
 [SQL introduction lessons](https://www.youtube.com/watch?v=zb3Qk8SG5Ms&list=PL4cUxeGkcC9jsz4LDYc6kv3ymONOKxwBU)  
 (_Spend 2-4 days (not more) to master those lessons_)
@@ -182,7 +182,7 @@ await Model.aggregate([{ $unwind: "$hobbies" }]);
 - `$sum`, `$avg`, `$min`, `$max`: Aggregates numbers.
 - `$project`: Picks specific fields to return from each document.
 
-# PostgreSQL
+# PostgreSQL, MongoDB concepts
 
 **PostgreSQL** is a powerful open-source **relational database system**:
 
@@ -324,6 +324,185 @@ Here composite key --> (StudentID, Course)
 | Mary      | Science    |
 
 > 🔎 Beyond 3NF (like BCNF, 4NF, 5NF...) are rarely used in dev.
+
+## Joins
+
+| JOIN Type    | Concept        | What It Does                                                                   |
+| ------------ | -------------- | ------------------------------------------------------------------------------ |
+| `INNER JOIN` | 🔍 Filter      | Returns **only rows that have matching values in both tables**                 |
+| `LEFT JOIN`  | ➕ Expansion   | Returns **all rows from the left table**, and matching rows from the right     |
+| `RIGHT JOIN` | ➕ Expansion   | Returns **all rows from the right table**, and matching rows from the left     |
+| `FULL JOIN`  | 🌀 Combination | Returns **all rows when there is a match in one of the tables**, left or right |
+| `CROSS JOIN` | 🔁 Cartesian   | Returns **all possible combinations** of rows from both tables                 |
+
+---
+
+### 🔍 INNER JOIN
+
+**Table A**
+
+| id  | name  |
+| --- | ----- |
+| 1   | Alice |
+| 2   | Bob   |
+| 3   | Carl  |
+
+**Table B**
+
+| id  | score |
+| --- | ----- |
+| 2   | 80    |
+| 3   | 90    |
+| 4   | 85    |
+
+```sql
+SELECT A.id, A.name, B.score
+FROM A
+INNER JOIN B ON A.id = B.id;
+```
+
+**Result:**
+
+| id  | name | score |
+| --- | ---- | ----- |
+| 2   | Bob  | 80    |
+| 3   | Carl | 90    |
+
+---
+
+### ➕ LEFT JOIN
+
+**Table A**
+
+| id  | name  |
+| --- | ----- |
+| 1   | Alice |
+| 2   | Bob   |
+| 3   | Carl  |
+
+**Table B**
+
+| id  | score |
+| --- | ----- |
+| 2   | 80    |
+| 3   | 90    |
+| 4   | 85    |
+
+```sql
+SELECT A.id, A.name, B.score
+FROM A
+LEFT JOIN B ON A.id = B.id;
+```
+
+**Result:**
+
+| id  | name  | score |
+| --- | ----- | ----- |
+| 1   | Alice | NULL  |
+| 2   | Bob   | 80    |
+| 3   | Carl  | 90    |
+
+---
+
+### ➕ RIGHT JOIN
+
+**Table A**
+
+| id  | name  |
+| --- | ----- |
+| 1   | Alice |
+| 2   | Bob   |
+| 3   | Carl  |
+
+**Table B**
+
+| id  | score |
+| --- | ----- |
+| 2   | 80    |
+| 3   | 90    |
+| 4   | 85    |
+
+```sql
+SELECT A.id, A.name, B.score
+FROM A
+RIGHT JOIN B ON A.id = B.id;
+```
+
+**Result:**
+
+| id  | name | score |
+| --- | ---- | ----- |
+| 2   | Bob  | 80    |
+| 3   | Carl | 90    |
+| 4   | NULL | 85    |
+
+---
+
+### 🌀 FULL JOIN
+
+**Table A**
+
+| id  | name  |
+| --- | ----- |
+| 1   | Alice |
+| 2   | Bob   |
+| 3   | Carl  |
+
+**Table B**
+
+| id  | score |
+| --- | ----- |
+| 2   | 80    |
+| 3   | 90    |
+| 4   | 85    |
+
+```sql
+SELECT A.id, A.name, B.score
+FROM A
+FULL JOIN B ON A.id = B.id;
+```
+
+**Result:**
+
+| id  | name  | score |
+| --- | ----- | ----- |
+| 1   | Alice | NULL  |
+| 2   | Bob   | 80    |
+| 3   | Carl  | 90    |
+| 4   | NULL  | 85    |
+
+---
+
+### 🔁 CROSS JOIN
+
+**Table A**
+
+| id  | name  |
+| --- | ----- |
+| 1   | Alice |
+| 2   | Bob   |
+
+**Table B**
+
+| id  | score |
+| --- | ----- |
+| 10  | 80    |
+| 20  | 90    |
+
+```sql
+SELECT A.name, B.score
+FROM A
+CROSS JOIN B;
+```
+
+**Result:**
+
+| name  | score |
+| ----- | ----- |
+| Alice | 80    |
+| Alice | 90    |
+| Bob   | 80    |
+| Bob   | 90    |
 
 ## Transaction
 
