@@ -20,6 +20,12 @@ and optimized CI/CD pipelines, **cutting release times by 75%.**
 I designed **core booking and search services**, improving **system stability and user experience as a result**.  
 Implemented `tag-based` filtering and ranking system functionality that boosted search result relevance and user return rates up almost **50%**;
 
+### A quick story how i moved to London:
+
+**Address:**
+East London, Hackney district.  
+Mare Street
+
 ## Geeks Ltd
 
 `Prometheus` and `Grafana` for real time monitoring.
