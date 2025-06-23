@@ -4,13 +4,20 @@
 
 ## ETG Experience (Booking Service)
 
-Over the past 3 years at ETG, London, I worked on a global flight booking system used **in more than 100+ countries**.
-We are a very high load service processing over **250k** active users per month.
+Over the past 3 years at **ETG**, I helped transform a global flight booking system (used in 100+ countries, 200K → 300K active users/month).
+from a monolith into a **resilient microservice ecosystem**.
+
+Highlights:
 
 Worked in **two teams:**
 
 - **so-called Extraneet** team responsible personal account for hotel owners
 - **Discovery team** responsible for core search and reservation business logic.
+
+### Backend-highlights:
+
+- Led the extraction of **Python monolithic** components into **independently deployable Node.js microservices** .
+-
 
 Led the **Hybrid Rate feature**, which generated **$1.8M in new revenue within 3 months**.  
 Personal account page contained lots of wizards and forms which my team got tired or building by hand.  

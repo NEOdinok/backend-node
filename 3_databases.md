@@ -330,7 +330,7 @@ Here composite key --> (StudentID, Course)
 | JOIN Type    | Concept        | What It Does                                                                   |
 | ------------ | -------------- | ------------------------------------------------------------------------------ |
 | `INNER JOIN` | 🔍 Filter      | Returns **only rows that have matching values in both tables**                 |
-| `LEFT JOIN`  | ➕ Expansion   | Returns **all rows from the left table**, and matching rows from the right     |
+| ``           | ➕ Expansion   | Returns **all rows from the left table**, and matching rows from the right     |
 | `RIGHT JOIN` | ➕ Expansion   | Returns **all rows from the right table**, and matching rows from the left     |
 | `FULL JOIN`  | 🌀 Combination | Returns **all rows when there is a match in one of the tables**, left or right |
 | `CROSS JOIN` | 🔁 Cartesian   | Returns **all possible combinations** of rows from both tables                 |
