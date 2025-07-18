@@ -17,10 +17,17 @@ A detailed explanation of how to approach this can be found in the Net Ninja tut
 
 ## Requirements
 
-- Create a server using **Express**
+- Create a server for online shoe store using **Express**
+
 - Integrate with a **MongoDB** database
-- Add some business logic  
-  (e.g., reading products by category — this part is up to your imagination)
+
+- Add filtration business logic by **category**, **name**, **priceMin**, **priceMax**
+
+```js
+  /products?category=shoes
+  /products?name=Nike%20t-shirt
+  /products?priceMin=10&priceMax=50
+```
 
 - Learn what **middleware** is  
   (implementation of the _Chain of Responsibility_ pattern)
