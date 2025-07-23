@@ -459,7 +459,7 @@ You reconstruct the current state by replaying all events in order.
 
 **CQRS** stands for Command Query Responsibility Segregation.
 
-Reading data - **\*queries**
+Reading data - **queries**
 Writing / modifying data - **commands**
 
 **✅ Pros:**
