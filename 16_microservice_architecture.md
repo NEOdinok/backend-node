@@ -177,7 +177,7 @@ Protobuf in practice:
 
 **.proto file**:
 
-```
+```proto
 syntax = "proto3";
 
 package flights;
