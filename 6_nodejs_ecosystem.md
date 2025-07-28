@@ -198,6 +198,7 @@ Parallel execution **only happens:**
 - **Writable**: you can write to (e.g. file, HTTP response).
 - **Duplex**: both readable and writable (e.g. socket).
 - **pipe()**: connects readable to writable (e.g. `fs.createReadStream().pipe(res)`).
+- **transform()** - a special type of duplex stream that can **modify or transform** the data as it is written and read (e.g. compression, encryption, or parsing).
 
 Efficient for working with large data.
 
