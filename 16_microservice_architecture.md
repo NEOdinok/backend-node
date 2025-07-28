@@ -264,8 +264,13 @@ A _Saga_ breaks a big operation (that touches multiple services) into smaller lo
 
 **Choreography vs Orchestration**
 
-- Choreography: Each service just reacts to events and sends out new events — like dancers following the rhythm without a central controller.
-- Orchestration: A central "orchestrator" tells services when to do what — like a conductor in a music orchestra.
+- Choreography: (Kafka, RabbitMQ) Each service just reacts to events and sends out new events — like dancers following the rhythm without a central controller.
+- Orchestration: (Temporal, Zeebe, AWS Step Functions) A central "orchestrator" tells services when to do what — like a conductor in a music orchestra.
+
+> 💡 Choreography (event‑driven, decentralized coordination) is the more modern approach
+
+**Technologies used**
+In today’s microservices world, event‑driven choreography (Kafka, RabbitMQ) are default for simple sagas.
 
 Choreography example:
 Scenario: Order & Product Services

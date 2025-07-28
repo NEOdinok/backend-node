@@ -111,6 +111,37 @@ producers (publishers) → Exchange → Queue
 - **Consumer (client)** only processes and acknowledgments messages.
 - **Simplifies client code**, **reduces the load** on the consumer.
 
+## RabbitMQ entities
+
+# RabbitMQ Core Entities
+
+- **Exchange**  
+  Think of an exchange like a post office sorter: it receives every incoming message and, based on rules, decides which queue(s) should get it.
+
+- **Queue**  
+  A queue is like your home mailbox: messages sit here until a consumer (you) comes by and picks them up.
+
+- **Binding**  
+  A binding is the address label that links an exchange to a queue. It tells the exchange, “If a message matches this pattern, deliver it to that queue.”
+
+- **Virtual Host (vhost)**  
+  A virtual host is like an apartment building with separate mailrooms: it provides isolated namespaces so multiple apps can use the same RabbitMQ server without stepping on each other’s messages.
+
+- **Connection**  
+  A connection is the TCP “phone line” between your application and the RabbitMQ broker. You usually open one per application instance.
+
+- **Channel**  
+  A channel is like an individual phone call on that line: it’s a lightweight, multiplexed session over a single connection. Best practice is to do most operations over channels rather than opening many connections.
+
+- **Message**  
+  The actual letter you send: it carries a payload (body) and optional metadata (headers, routing key, TTL). Exchanges and queues handle messages.
+
+- **User & Permission**  
+  Users are like people with mailroom keys, and permissions control which vhosts/exchanges/queues they can access.
+
+- **Policy**  
+  Policies let you apply configuration (e.g., TTL, mirroring) across many queues or exchanges at once—like building codes that apply to all apartments on a floor.
+
 ## RabbitMQ usage example on a project:
 
 ```plaintext
