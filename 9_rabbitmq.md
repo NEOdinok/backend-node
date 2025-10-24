@@ -8,8 +8,14 @@ It supports the **AMQP protocol**.
 **Distributed task processing** - meaning that distributed system processes messages by **publisher confirmations** that
 RabbitMQ got the message and **consumer acknowledgements** that consumer got and processed the message.
 
-```plaintext
-producers (publishers) → Exchange → Queue
+```mermaid
+graph TD
+  App[Application] --> |"1 Establishes TCP"| Connection(Connection)
+  Connection --> |"2 Creates"| Channel(Channel)
+  Channel --> |"3 Publishes Message to"| Exchange(Exchange)
+  Exchange --> |"4 Routes based on Binding"| Queue(Queue)
+  Queue --> |"5 Delivers Message to"| Channel
+  Channel --> |"6 Consumes Message from"| App
 ```
 
 ### 🧭 RabbitMQ Workflow
@@ -23,7 +29,7 @@ producers (publishers) → Exchange → Queue
 
 ## 🧭 Exchange Types
 
-- **Direct** - Exact match on routing key
+- **Direct** - (Default one) Routes to queue 
 - **Topic** - Pattern match (`*.error`, `user.*`)
 - **Fanout** - Broadcast to all queues
 - **Headers** Match on custom headers instead of keys
@@ -107,13 +113,14 @@ producers (publishers) → Exchange → Queue
 
 ## Smart broker dumb consumer
 
+- `RabbitMQ` is smart broker
 - In `RabbitMQ` the **broker (server)** manages all the logic for delivery, routing, and ordering of messages
 - **Consumer (client)** only processes and acknowledgments messages.
 - **Simplifies client code**, **reduces the load** on the consumer.
 
 ## RabbitMQ entities
 
-# RabbitMQ Core Entities
+## RabbitMQ Core Entities
 
 - **Exchange**  
   Think of an exchange like a post office sorter: it receives every incoming message and, based on rules, decides which queue(s) should get it.
@@ -141,6 +148,33 @@ producers (publishers) → Exchange → Queue
 
 - **Policy**  
   Policies let you apply configuration (e.g., TTL, mirroring) across many queues or exchanges at once—like building codes that apply to all apartments on a floor.
+
+## Delivery semantics
+- at-least-once
+- at-most-once
+- exactly-once (tricky)
+
+## ⚔️ RabbitMQ vs Kafka
+
+> 💡 In *Kafka* **Offset** = the unique, incremental position number of each message inside a Kafka **partition**.
+> 💡 Kafka **topic** (which you might think of as “a queue”) is split into multiple **partitions** for scalability and parallelism.
+
+**Kafka** looks like this:
+
+```sql
+Topic: payments
+ ├── Partition 0:  offset 0 1 2 3 4 ...
+ ├── Partition 1:  offset 0 1 2 3 4 ...
+ └── Partition 2:  offset 0 1 2 3 4 ...
+
+```
+| Feature           | RabbitMQ                                                     | Kafka                                                              |
+| :---------------- | :----------------------------------------------------------- | :----------------------------------------------------------------- |
+| **Broker Type**   | **Smart Broker**: Manages message routing, queuing, and delivery logic (pushes messages to consumers). | **Dumb Broker (Log-based)**: Simple, immutable log of messages. Consumers pull messages and manage their own state (offsets). |
+| **Persistence**   | Messages are typically **deleted after delivery/acknowledgment**. Durability options (durable queues, durable messages) ensure survival of broker restarts, but not long-term storage or replayability. | All messages are **persisted to disk** in an immutable log for a configurable retention period. Supports re-reading messages. |
+| **Delivery**      | **At-Least-Once** (with acknowledgments) by default. At-most-once (by disabling acks). Exactly-once is complex and requires application-level logic. | **At-Least-Once** by default. Exactly-once achievable with Kafka Transactions. At-most-once by committing offsets before processing. |
+| **Message Routing** | **Rich routing capabilities** via various Exchange types (Direct, Topic, Fanout, Headers). Built-in Fanout Exchange for broadcast. | Primarily **topic-based partitioning**. Fanout/broadcast achieved by multiple consumer groups subscribing to the same topic. |
+| **Use Case**      | **Traditional message queuing**, task queues, complex routing. | **Event streaming**, log aggregation, real-time analytics, big data ingestion. |
 
 ## RabbitMQ usage example on a project:
 
