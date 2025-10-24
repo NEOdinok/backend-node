@@ -31,3 +31,10 @@ describe("myModule", function () {
 ### 🧰 Nock
 
 LIbrary that used to imitate calls by **HTTP** to a remote service
+
+## E2E Testing
+
+**E2E test** checks the whole path from *api request* and back. Unlike the unit test, **E2E** does not mock anything
+
+In **E2E tests**, you run your real app instance (not mocks) and often connect it to a test DB (empty or pre-seeded with fake data).
+
