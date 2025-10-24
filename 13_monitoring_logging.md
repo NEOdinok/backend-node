@@ -2,11 +2,12 @@
 
 ---
 
-## 📝 Winston (Node.js Logging)
+## 📝 Winston, Pino (Node.js Logging)
 
-- A **logging library** for Node.js
-- Helps
-- Replaces raw `console.log` with **structured, organized, configurable logs**
+- A **logging libraries** for Node.js
+- Helps replace raw `console.log` with **structured, organized, configurable logs**
+
+> Winston is very old one. Pino - new, widely used one
 
 > Installed as a **project dependency**, can log to console, files, etc
 
