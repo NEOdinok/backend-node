@@ -18,6 +18,15 @@ In relational databases, **strict relationships** enforce _referential integrity
 - **Drivers** table: each driver references a car via a foreign key.
 - It is **impossible to delete a car** while there are still **drivers pointing to it**.
 
+### Shorthands used in PostgreSQL world
+
+| Аббревиатура | Название                     | Пример           | Что делает              |
+| ------------ | ---------------------------- | ---------------- | ----------------------- |
+| **DML**      | Data Manipulation Language   | INSERT, UPDATE   | Changed data            |
+| **DDL**      | Data Definition Language     | CREATE, DROP     | Changes the structure   |
+| **DCL**      | Data Control Language        | GRANT, REVOKE    | Changes rights          |
+| **TCL**      | Transaction Control Language | COMMIT, ROLLBACK | Manages transactions    |
+
 ## NoSQL (Not Only SQL)
 
 - Schema-less or flexible schema (documents, key-value, graph, etc.).
@@ -181,6 +190,61 @@ await Model.aggregate([{ $unwind: "$hobbies" }]);
 - `$skip`: Skips a number of documents.
 - `$sum`, `$avg`, `$min`, `$max`: Aggregates numbers.
 - `$project`: Picks specific fields to return from each document.
+
+## Database Access and Tools in Node.js
+
+### ORM (Object-Relational Mapping)
+
+ORM provides an abstraction layer over the database, allowing us to interact with DB in an object-oriented paradigm.  
+You define models, those map to database tables, and then these models are used to perform DB operations.
+
+**✅ Pros:**
+- **Abstraction**: Hides complex SQL queries, allowing you to work with database entities as objects.
+- **Productivity**: Speeds up development with less boilerplate code.
+- **Security**: Helps prevent SQL injection attacks by sanitizing inputs.
+- **Maintainability**: Easier to refactor and maintain code, especially in large projects.
+-   **Database Agnostic (to some extent)**: Many ORMs support multiple database systems, allowing easier switching.
+
+**🔴 Cons:**
+- **Performance Overhead**: Can generate slower queries for complex operations, leading to n+1 query issues.
+- **Limited SQL Control**: May require dropping down to raw SQL for highly optimized or database-specific complex queries.
+
+**Popular Node.js ORMs for SQL Databases**
+
+- **Prisma**: Modern, simple. Generates a type-safe client.
+- **TypeORM**: More established, well-recognized. Emphasizes TypeScript and decorators.
+- **Sequelize**: robust with strong transaction support and migrations.
+
+> 💡 ORMs for Node.js are promise-based
+
+### Lightweight SQL Builders
+
+SQL builders offer a more programmatic way to construct SQL queries compared to writing raw SQL. One important difference is that they do not provide object mapping like an ORM; instead, they offer a fluent API to build queries, allowing for greater control over the generated SQL.
+
+**✅ Pros:**
+- **Control**: Offers more control over the generated SQL compared to ORMs.
+- **Flexibility**: Easier to write complex or database-specific queries that might be cumbersome in an ORM.
+- **Readability**: Programmatic construction of queries can be more readable than concatenated raw SQL strings.
+- **Security**: Helps prevent SQL injection through parameter binding.
+
+**Popular Node.js SQL Builders:**
+- `pgtyped`: Generates types from SQL queries for type-safe raw SQL with PostgreSQL.
+- `Kysely`
+- `Knex.js`
+
+### Raw Inline SQL
+Raw inline SQL involves writing and executing SQL queries directly as strings in your application code.  
+At least an SQL builder is used nowdays. 
+
+**✅ Pros**
+- **Full Control** – Direct access to all SQL features and optimizations.
+- **Performance** – No abstraction overhead.
+- **Simplicity** – Convenient for small, straightforward queries.
+
+**🔴 Cons:**
+- **Security**– Must use parameterized queries to avoid SQL injection.
+- **Maintainability** – Harder to refactor and debug in large codebases.
+- **Vendor Lock-In** – Queries tightly coupled to one SQL dialect.
 
 # PostgreSQL, MongoDB concepts
 
@@ -793,7 +857,11 @@ Locks designed to ensure data consistency when multiple transactions access it s
 
 Think **edit access** rules in Google Docs.
 
-### 🔹 Types of Locks
+### Types of Locks
+
+Locks differ by their *behaviour* and *scale*
+
+#### 📏 Different types of lock scale
 
 | Lock Type          | Description                                     |
 | ------------------ | ----------------------------------------------- |
@@ -801,7 +869,9 @@ Think **edit access** rules in Google Docs.
 | **Table-level**    | Locks the entire table (`LOCK TABLE users`)     |
 | **Database-level** | Locks entire DB (e.g., during backup/restore)   |
 
-#### 🔸 Pessimistic Locking (🛡️ Assume conflict will happen)
+#### 🧩 Pessimistic Locking behaviour
+
+Assume conflict will happen
 
 **Google Docs analogy**:  
 You “lock” a paragraph so others **can’t edit it** while you’re working.
@@ -811,21 +881,27 @@ You “lock” a paragraph so others **can’t edit it** while you’re working.
 - Prevents race conditions.
 - **Slower** due to many locks.
 
-#### 🔸 Optimistic Locking (🎯 Hope for the best)
+#### 🧩 Optimistic Locking behaviour
+
+Hope for the best
 
 **Google Docs analogy**:  
 Everyone can edit freely. When you click save, Google checks if someone else has changed the same paragraph.  
 If yes, you get a **conflict warning**.
 
+??? is it a db feature or do we have to check something on the application level ?
+
 - No locking during read
 - Conflict check before write
 - **Efficient but may rollback on conflict**
 
+#### 🎨
+
 ## Deadlocks
 
-A situation that arises when two or more transactions mutually block each other.  
-PostgreSQL automatically detects deadlocks and aborts one of the transactions.
-Throws an error that should be handled by the application.
+Two or more transactions mutually block each other.  
+PostgreSQL automatically detects deadlocks and aborts one of the transactions.  
+Throws an error that should be handled by the application.  
 
 ## 📚 Indexes in Databases (PostgreSQL + MongoDB)
 
@@ -1000,7 +1076,7 @@ Controls how PostgreSQL **reads data from tables**.
 
 **🔹 `enable_indexscan` (Index Scan)**
 
-- **Reads table but uses index** to locate needed rows
+- **Uses index** to locate needed rows but reads rows info from table (heap)
 - **Example:**
 
 ```sql
@@ -1008,7 +1084,8 @@ CREATE INDEX idx_users_email ON users (email);
 SELECT * FROM users WHERE email = 'test@mail.com';
 ```
 
-- Query asks for all columns (SELECT \*), but the index only has email
+The index helps find the right row(s) fast.  
+But because `SELECT *` needs all columns, PostgreSQL still must read the full row from the table.
 
 **🔹 `enable_indexonlyscan` (Index-Only Scan)**
 
@@ -1229,58 +1306,30 @@ The two main approaches are **Sharding** and **Replication**.
 | `EXPLAIN`         | Shows the **execution plan** without running the query.      |
 | `EXPLAIN ANALYZE` | **Executes** the query and shows actual performance metrics. |
 
+
+> `**Seq Scan**` (Sequential Scan) in `EXPLAIN` output means the database reads **every row** of the table to find matches. This is efficient for small tables or when a large percentage of rows are needed. Almost always means room for optimization when seen on large tables.
+
 So it drops the database and shows you the time it took to do it
 
-## Task 1
+## N+1 Problem
 
-**Twitter SQL Interview Question**
+Imagine one query fetches `N` records, and then for each record another query is executed — totaling `N+1` queries.  
+This is bad and results in performance issues.
 
----
+**Way to fix it**
+Use JOIN + aggregate (`JOIN`, `GROUP BY`) to fetch everything in one query.
 
-### Question
+## Extra notes on lock types 
 
-This is the same question as problem #6 in the SQL Chapter of [Ace the Data Science Interview](https://www.acethedatascienceinterview.com)!
+> 💡 `SHARE` in case of DB means read as long as you are not writing.
 
-Assume you're given a table Twitter tweet data, write a query to obtain a histogram of tweets posted per user in 2022.
-Output the tweet count per user as the bucket and the number of Twitter users who fall into that bucket.
+> All of those locks below are **table-scoped**
 
-In other words, group the users by the number of tweets they posted in 2022 and count the number of users in each group.
-
----
-
-### `tweets` Table
-
-| Column Name | Type      |
-| ----------- | --------- |
-| tweet_id    | integer   |
-| user_id     | integer   |
-| msg         | string    |
-| tweet_date  | timestamp |
-
----
-
-### `tweets` Example Input
-
-| tweet_id | user_id | msg                                                               | tweet_date          |
-| -------- | ------- | ----------------------------------------------------------------- | ------------------- |
-| 214252   | 111     | Am considering taking Tesla private at $420. Funding secured.     | 12/30/2021 00:00:00 |
-| 739252   | 111     | Despite the constant negative press covfefe                       | 01/01/2022 00:00:00 |
-| 846402   | 111     | Following @NickSinghTech on Twitter changed my life!              | 02/14/2022 00:00:00 |
-| 241425   | 254     | If the salary is so competitive why won’t you tell me what it is? | 03/01/2022 00:00:00 |
-| 231574   | 148     | I no longer have a manager. I can't be managed                    | 03/23/2022 00:00:00 |
-
----
-
-### Example Output
-
-| tweet_bucket | users_num |
-| ------------ | --------- |
-| 1            | 2         |
-| 2            | 1         |
-
----
-
-### Explanation
-
-Based on the example output, there are two users who posted only one tweet in 2022, and one user who posted two tweets in 2022.
-The query groups the users by the number of tweets they posted and displays the number of users in each group.
+| Lock Mode                  | Blocks                           | Typical usage                        | Google Docs analogy                                      |
+| -------------------------- | -------------------------------- | ------------------------------------ | -------------------------------------------------------- |
+| **Row Exclusive**          | DDL like DROP/TRUNCATE           | Auto by `INSERT`, `UPDATE`, `DELETE` | Editing a paragraph; can’t delete document while editing |
+| **Row Share**              | DDL requiring exclusive lock     | `SELECT ... FOR SHARE`               | Reading, commenting but doc can’t be deleted             |
+| **Share**                  | Writers (`INSERT/UPDATE/DELETE`) | `LOCK TABLE ... IN SHARE MODE`       | Everyone can read, no one can type                       |
+| **Share Update Exclusive** | Other VACUUM/DDL                 | Internal (VACUUM)                    | System doing background cleanup                          |
+| **Exclusive**              | All reads/writes by others       | `LOCK TABLE ... IN EXCLUSIVE MODE`   | You fully “checked out” document; others wait            |
+| **Access Exclusive**       | Everything                       | `ALTER`, `DROP`, `TRUNCATE`          | Admin locks doc for restructure; no access               |
