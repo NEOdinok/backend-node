@@ -1,4 +1,4 @@
-## 📚 PostgreSQL Database Design
+## 1. 📚 PostgreSQL Database Design
 
 - You need to **design a database** (describe entities, their attributes, and relationships between them).
 
@@ -12,7 +12,7 @@
 
 - Documents can be different: `passport`, `INN`, `SNILS`, `visa`, `migration card`.
 
-## 📚 PostgreSQL complicated task
+## 2. 📚 PostgreSQL complicated task
 
 SQL Задача: Гистограмма по числу твитов в 2022 году
 
