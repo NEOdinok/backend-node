@@ -175,6 +175,12 @@ Protobuf in practice:
 - Implement service in code
 - Implement client in code
 
+**Important note on .proto**
+- `.proto` file defines a strict schema
+- Must live in a shared repo or central registry
+- Client code should be auto-generated, not handwritten
+
+
 **.proto file**:
 
 ```proto
@@ -219,6 +225,12 @@ gRPC call to Pricing Service
   ↓
 Booking response sent back
 ```
+
+### 🛡️ Why gRPC is internal-only
+
+- Uses *binary format* (hard for browsers to consume)
+- No *CORS*, *caching*, *auth* or *versioning* built-in
+- Technically possible to expose externally (via gRPC-Web, Envoy), but **bad practice**
 
 ## CAP Theorem
 

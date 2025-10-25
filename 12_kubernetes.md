@@ -36,6 +36,19 @@ Kubernetes (K8s) is a platform for **automating deployment, scaling, and managem
 
 ---
 
+### K8S Kubernetes vs Docker Swarm
+
+| Concept                       | 🐳 Docker Swarm                                        | ☸️ Kubernetes                                          |
+| ----------------------------- | ---------------------------------------------------- | --------------------------------------------------- |
+| **Where orchestration lives** | Inside Docker Engine                                 | Independent system with multiple control components |
+| **Scaling**                   | Manual via `docker service scale`                    | Declarative (`replicas`, auto-scaling)              |
+| **Balancing**                 | Built-in (routing mesh + overlay network)            | Through `Service` objects                           |
+| **Overlay network**           | Virtual layer for cross-node container communication | Similar concept via `ClusterIP` + `CNI plugins`     |
+
+> 💡 *Overlay Network* - Exist in multi-host setups — *Docker Swarm* and *Kubernetes* both have them, but regular *Docker* and *Compose* do not.
+
+---
+
 ### ✅ Summary
 
 | Concept    | Purpose                                     |

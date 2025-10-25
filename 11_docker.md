@@ -68,3 +68,18 @@ EXPOSE 8080
 # Run app
 CMD [ "node", "server.js" ]
 ```
+
+---
+
+### Docker Compose vs Docker Swarm 
+
+> 💡 **Docker Compose** is a simple tool for defining and running multi-container applications on a single host.
+
+> 💡 **Docker Swarm** is Docker’s built-in container orchestrator for running and scaling services across multiple machines (nodes).
+
+| Feature            | Docker Compose                         | Docker Swarm                                  |
+| ------------------ | -------------------------------------- | --------------------------------------------- |
+| **Use case**       | Local development                      | Production / multi-node clusters              |
+| **Scope**          | Manages containers on a single machine | Orchestrates containers across multiple nodes |
+| **Command**        | `docker compose up`                    | `docker stack deploy`                         |
+| **Load balancing** | ❌ No built-in load balancing           | ✅ Built-in load balancing via routing mesh    |

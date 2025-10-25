@@ -937,8 +937,7 @@ With an index:
 | SP-GiST | 🧭 Supports non-balanced trees, advanced use cases        |
 | GIN     | 📚 Good for indexing arrays, JSONB, and full-text search  |
 | BRIN    | 📦 Efficient for large, ordered tables (e.g. time series) |
-
-### 🔧 How to Create Indexes
+> 💡 JSONB — a special PostgreSQL data type that stores JSON in binary form, allowing efficient search, filtering, and indexing without requiring a fixed schema.### 🔧 How to Create Indexes
 
 ### 1️⃣ **Single Column**
 
