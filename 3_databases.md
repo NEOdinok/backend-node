@@ -1310,6 +1310,14 @@ The two main approaches are **Sharding** and **Replication**.
 
 So it drops the database and shows you the time it took to do it
 
+## Query Fingerprints
+
+**Query fingerprint** — normalized SQL where literals are replaced with placeholders.
+
+```sql
+SELECT * FROM users WHERE id = 777 →  SELECT * FROM users WHERE id = ?
+```
+
 ## N+1 Problem
 
 Imagine one query fetches `N` records, and then for each record another query is executed — totaling `N+1` queries.  

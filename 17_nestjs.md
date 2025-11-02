@@ -80,7 +80,7 @@ When creating NestJS App through command line, you get the following project str
 - **Providers** Can be any class that can be injected into other classes through the constructor, including services, repositories, factories, helpers, etc.
 - **Services** Usually decorated with **@Injectable()**. Used to abstract business logic or interact with databases,
 - **Pipes** Used for input data transformation or validation, applied at the route parameter level, globally, or at the route handler level.
-- **Exception Filters** Catch exceptions that occur during request processing.
+- **Exception Filters** Let us plug into global `ExceptionsHandler` thing and alter the behaviour a bit.
 - **Interceptors** Extend basic method functionality, allowing additional logic before or after the execution of a method.
 - **Decorators** Used to add additional **metadata** to classes, methods, and parameters.
 - **Guards** Responsible for authorization and other access checks, controlling **whether a specific request is allowed**.
@@ -156,12 +156,15 @@ export class UsersController {
 }
 ```
 
-## HTTP Interceptor and Exception Handling
+## HTTP ExceptionsHandler
 
-**Interceptors** in NestJS are created by implementing the `NestInterceptor` interface and defining the `intercept()` method.  
-They can then be registered globally, at the controller level, or route level.
+- Nest has a global `ExceptionsHandler` that knows how to turn thrown errors (e.g., HttpException) into HTTP responses.
+- `Exception Filters` are your way to plug into that mechanism to:
+  - Catch specific exception types (or all),
+  - Log/enrich them
+  - Return a custom HTTP response/body/headers.
 
-NestJS provides a built-in `ExceptionsHandler`, as well as the ability to create custom exception filters for handling and returning appropriate responses to the client.
+
 
 ## Pipes
 
