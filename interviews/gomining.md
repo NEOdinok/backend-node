@@ -265,11 +265,10 @@ CREATE TABLE users (
     age INT
 );
 
--- составной (compound) индекс
 CREATE INDEX idx_users_name_age ON users (name, age);
 
--- Проверим, будет ли использоваться индекс
-EXPLAIN ANALYZE SELECT * FROM users WHERE age = 10; -- нет
-EXPLAIN ANALYZE SELECT * FROM users WHERE name = 'John'; -- да
-EXPLAIN ANALYZE SELECT * FROM users WHERE age = 10 AND name = 'John'; -- да (планнер постгреса умный)
+EXPLAIN ANALYZE SELECT * FROM users WHERE name = "Gosha" AND age = '25';  -- OK 
+EXPLAIN ANALYZE SELECT * FROM users WHERE age = 10 AND name = 'John'; -- NO
+EXPLAIN ANALYZE SELECT * FROM users WHERE age = 10; -- NO
+EXPLAIN ANALYZE SELECT * FROM users WHERE name = 'gosha; -- OK
 ```
