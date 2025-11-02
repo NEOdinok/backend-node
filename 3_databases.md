@@ -207,7 +207,8 @@ You define models, those map to database tables, and then these models are used 
 
 **🔴 Cons:**
 - **Performance Overhead**: Can generate slower queries for complex operations, leading to n+1 query issues.
-- **Limited SQL Control**: May require dropping down to raw SQL for highly optimized or database-specific complex queries.
+- **Limited SQL Control**: Hard to predict which SQL will be executed
+- **ORM magic***: Has it's own context, cache and so on.
 
 **Popular Node.js ORMs for SQL Databases**
 
@@ -849,7 +850,9 @@ Like **Repeatable Read** + others are not allowed to edit at all
 
 > ℹ️ **Lost Update** is not listed as a formal "read phenomenon" but is a real issue.
 
-> 📌 PostgreSQL is stricter than the SQL standard and does not allow dirty reads even at the lowest isolation level.
+> Default isolation level in PG is `READ COMMITED`
+
+> Isolation levels can be configured *per-query*, *per-session*
 
 ## 🔒 Locks in PostgreSQL
 
