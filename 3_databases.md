@@ -55,59 +55,120 @@ In relational databases, **strict relationships** enforce _referential integrity
 ## Scaling
 
 **Vertical Scaling (Scaling Up)**:
-
 - Add more resources (CPU, RAM, SSD) to a single server.
 - Simple to implement, limited by hardware capacity — eventually hits a ceiling.
 
 **Horizontal Scaling (Scaling Out)**:
-
 - Add more servers and distribute the data/workload.
 - More complex but allows for much higher scalability.
 
-### PostgreSQL Scaling
+## 📚 Database Scalability Concepts: Sharding and Replication
 
-**✅ Vertical Scaling**
+When a single database instance can no longer handle the load, we scale the system by distributing data **across multiple instances**.  
+The two main approaches are **Sharding** and **Replication**.
+
+### 🔹 Sharding (Horizontal Partitioning)
+
+- Data is **split into slices (shards)** based on some criteria (e.g., user IDs, regions).
+- **Each shard holds a portion of the data** and operates on its own database instance.
+- Used to **scale write operations** and distribute data storage.
+
+🧩 **Example**:
+
+- **Shard 1** → Users with IDs from 1 → 10,000
+- **Shard 2** → Users with IDs from 10,001 → 20,000
+
+📌 **Pros**:
+
+- Write operations can be distributed across shards.
+- Each shard handles a smaller dataset → faster queries.
+
+📌 **Cons**:
+
+- Complex to manage and maintain.
+- Cross-shard queries become harder.
+- Requires a good sharding key to avoid data imbalance.
+
+### 🔹 Replication (Master-Slave Model)
+
+- One **Master** handles all **write operations**.
+- One or more **Slaves (Replicas)** handle **read operations**.
+- The Master replicates changes to the Slaves to keep them updated.
+
+🧩 **Example Workflow**:
+
+1. Insert new user → Goes to Master.
+2. Read user profile → Served by a Slave (replica).
+
+📌 **Pros**:
+
+- Scales **read operations** effectively (which are typically ~80-90% of queries in web apps).
+- Reduces load on the Master.
+- Improves **fault tolerance**: if a Slave fails, others keep working.
+
+📌 **Cons**:
+
+- Writes are still limited by the capacity of a single Master.
+- Data on Slaves might be **slightly stale** (due to replication lag).
+
+**How to choose ?**
+
+| Scenario          | Use Sharding                             | Use Replication                    |
+| ----------------- | ---------------------------------------- | ---------------------------------- |
+| High write load   | ✅ Yes                                   | ❌ No (writes still go to Master)  |
+| High read load    | ✅ Sometimes (if data split makes sense) | ✅ Yes (scale reads with replicas) |
+| Fault tolerance   | ✅ Yes (data spread across nodes)        | ✅ Yes (failover to replicas)      |
+| Simplicity needed | ❌ Complex                               | ✅ Easier to implement             |
+
+## PostgreSQL Scaling
+
+**PG Vertical Scaling**
 
 - PostgreSQL works well with vertical scaling.
-- Easy: just upgrade the server.
 - But you can only scale a single machine so far.
 
-**✅ Read Scaling with Replication**
 
-- Replication = copy of the primary database to one or more read-only replicas.
-- Great for read-heavy applications.
-- Application must route **read queries** to replicas and **write queries** to the primary.
-
-**⚠️ Horizontal Scaling**
-
-- PostgreSQL does **not** support automatic sharding out of the box.
-- **Manual sharding** required at the application level:
+**PG Horizontal Scaling**
+- PostgreSQL **does not** support automatic sharding out of the box !
+- Sharding is usually implemented via **extensions** (e.g., `Citus`).
+- Other config on application level is required when **sharding** PG:
   - Divide data based on a key (e.g., user ID).
   - Send reads/writes to appropriate server.
-- Some cloud-managed PostgreSQL clusters offer helper tools (e.g., Citus), but **automatic sharding is still limited**.
 
-### MongoDB Scaling
+**PG Replication**
 
-**✅ Vertical Scaling**
+- *Replication* = copy of the primary database to one or more read-only replicas.
+- Great for read-heavy applications.
+- Application must route **read queries** to replicas and **write queries** to the primary.
+- `primary_conninfo` on a replica shows where the master is
+- `standby_mode=on` tells us that this is a replica
+- `pg_basebackup` copy DB from master when creating a replcia
 
-- Supports vertical scaling similarly to PostgreSQL.
-- However, MongoDB is **designed with horizontal scaling in mind**.
+## MongoDB Scaling
 
-**✅ Horizontal Scaling (Automatic Sharding)**
+**Mongo Vertical Scaling**
+
+- MongoDB is **designed with horizontal scaling in mind**.
+- However, supports vertical scaling similarly to PostgreSQL.
+
+**Mongo Horizontal Scaling (Sharding)**
 
 - MongoDB **natively supports automatic sharding**:
   - Data is split across shards using a **shard key**.
   - A **mongos** query router handles routing.
   - **Config servers** store metadata about the cluster.
+  - Each shard is deployed as a **replica set**, so every shard has its own primary and secondaries for redundancy.
 - Shard key can be a **composite key** (multiple fields). This is often used
 
-**✅ Replication for High Availability**
-
+**Mongo Replication**
 - MongoDB uses **replica sets** (1 Primary + N Secondary nodes).
 - If Primary fails:
   - Secondaries hold an **election**.
   - Consider: node priority, latest data, MongoDB version.
   - **Quorum-based voting** elects the new Primary.
+- Sharding and replication are configured through MongoDB's built-in tooling (`mongod`, `mongos`, `mongo/mongosh` shell commands, and replica set configuration commands); 
+
+## Summary about scaling 
 
 | Feature                      | PostgreSQL                   | MongoDB                    |
 | ---------------------------- | ---------------------------- | -------------------------- |
@@ -1243,63 +1304,6 @@ EXECUTE FUNCTION notify_change();
 
 **Temporary Triggers** work until the end of session. Useful for debugging.
 
-## 📚 Database Scalability Concepts: Sharding and Replication
-
-When a single database instance can no longer handle the load, we scale the system by distributing data **across multiple instances**.  
-The two main approaches are **Sharding** and **Replication**.
-
-### 🔹 Sharding (Horizontal Partitioning)
-
-- Data is **split into slices (shards)** based on some criteria (e.g., user IDs, regions).
-- **Each shard holds a portion of the data** and operates on its own database instance.
-- Used to **scale write operations** and distribute data storage.
-
-🧩 **Example**:
-
-- **Shard 1** → Users with IDs from 1 → 10,000
-- **Shard 2** → Users with IDs from 10,001 → 20,000
-
-📌 **Pros**:
-
-- Write operations can be distributed across shards.
-- Each shard handles a smaller dataset → faster queries.
-
-📌 **Cons**:
-
-- Complex to manage and maintain.
-- Cross-shard queries become harder.
-- Requires a good sharding key to avoid data imbalance.
-
-### 🔹 Replication (Master-Slave Model)
-
-- One **Master** handles all **write operations**.
-- One or more **Slaves (Replicas)** handle **read operations**.
-- The Master replicates changes to the Slaves to keep them updated.
-
-🧩 **Example Workflow**:
-
-1. Insert new user → Goes to Master.
-2. Read user profile → Served by a Slave (replica).
-
-📌 **Pros**:
-
-- Scales **read operations** effectively (which are typically ~80-90% of queries in web apps).
-- Reduces load on the Master.
-- Improves **fault tolerance**: if a Slave fails, others keep working.
-
-📌 **Cons**:
-
-- Writes are still limited by the capacity of a single Master.
-- Data on Slaves might be **slightly stale** (due to replication lag).
-
-### How to choose ?
-
-| Scenario          | Use Sharding                             | Use Replication                    |
-| ----------------- | ---------------------------------------- | ---------------------------------- |
-| High write load   | ✅ Yes                                   | ❌ No (writes still go to Master)  |
-| High read load    | ✅ Sometimes (if data split makes sense) | ✅ Yes (scale reads with replicas) |
-| Fault tolerance   | ✅ Yes (data spread across nodes)        | ✅ Yes (failover to replicas)      |
-| Simplicity needed | ❌ Complex                               | ✅ Easier to implement             |
 
 ## 💥 `EXPLAIN ANALYZE DROP DATABASE postgres`?
 
