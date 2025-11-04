@@ -685,9 +685,27 @@ class UserRegisteredEvent {
 Product--(Event)--[Broker]--(Event)-->Consumer
 ```
 
-**Can be in both styles:**
-- **Pub/Sub (topic)**: One event → **many subscribers** to a topic get a copy (fan‑out).
-- **Work Queue (competing consumers)**: One event → **exactly one** worker handles it.
+### Pub / Sub (Publish / Subscribe)
+
+*One* event → delivered to *all interested subscribers*.
+
+```css
+[Order Service]  ──▶  [Broker: "order.created" topic]
+                             ├──▶ [Email Service]
+                             ├──▶ [Analytics Service]
+                             └──▶ [Inventory Service]
+```
+
+### Work Queue (Competing Consumers)
+
+*One* task message → handled by *exactly one worker*.
+
+```css
+[Order Processor] ─▶ [Broker: "order.tasks" queue]
+                          ├──▶ [Worker #1]
+                          ├──▶ [Worker #2]
+                          └──▶ [Worker #3]
+```
 
 ### Pros and Cons
 - ✅ Decouple teams/services; reduce tight, synchronous dependencies.

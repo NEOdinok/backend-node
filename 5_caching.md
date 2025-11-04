@@ -188,7 +188,7 @@ A **"pool"** is a collection of **pre-established, ready-to-use connections**.
 - `ZRANGE key start stop WITHSCORES`: read by rank (low→high).
 - `ZREVRANGE key start stop WITHSCORES`: read by rank (high→low).
 
-> 💡 Resis can be configured for pub/sub.`PUBLISH channel message` / `SUBSCRIBE channel`: lightweight notifications.
+> 💡 Resis can be configured (though not widely used) for pub/sub. `PUBLISH channel message` / `SUBSCRIBE channel`: lightweight notifications.
 
 📌 Common patterns, examples
 - Cache with TTL: `SETEX user:123 60 {json}`.
