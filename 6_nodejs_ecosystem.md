@@ -445,10 +445,39 @@ class MyClass {}
 
 ## DTO (Data Transfer Object)
 
-- A **class or structure** used to **standardize** data exchange between services.
-- Used for:
-  - **Validation**
-  - **Serialization/Deserialization**
-  - Ensuring class survives **TypeScript to JavaScript transpile**
+> 💡 `DTO` is like `zod` validator on the frontend
 
-**In practice**: Acts as a **mapper** between raw input and internal logic, especially in microservice APIs.
+First, an example:
+
+```ts
+import { IsString, IsInt, Min } from 'class-validator';
+
+// Define DTO
+export class CreateUserDto {
+  @IsString()
+  name: string;
+
+  @IsInt()
+  @Min(1)
+  age: number;
+}
+
+// Usage
+@Post()
+createUser(@Body() body: CreateUserDto) {
+  // body is automatically validated and typed
+  return this.userService.create(body);
+}
+```
+> 💡 `class-validator`, `class-transformer` - *external libraries*
+
+> 💡 `ValidationPipe` is included in Nest.js itself
+
+Here is what happens:
+Notes on what is happening
+1. Define DTO
+2. Then in `createUser` put whatever came in the body into `body` variable, validate it against `CreateUserDto` 
+3. If error - throw `BadRequestException`
+4. ! Validation only happens if you've enabled global `ValidationPipe`.
+
+

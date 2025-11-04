@@ -197,6 +197,64 @@ When creating NestJS App through command line, you get the following project str
 - **Guards** Responsible for authorization and other access checks, controlling **whether a specific request is allowed**.
 - **DTOs (Data Transfer Objects)** Define the format of data transferred between the client and server.
 
+## Nest request flow
+
+```css
+Incoming Request
+   ↓
+[Middleware]
+   ↓
+[Guards]
+   ↓
+[Interceptors (before)]
+   ↓
+[Pipes (validation / transformation)]
+   ↓
+[Controller → Service → Repository]
+   ↓
+[Interceptors (after)]
+   ↓
+Response
+```
+
+Whereas in *classic Express app* there is:
+```css
+Router --> controller --> service --> repository
+```
+
+In Nest.js there is no need for a dedicated *repository* due to it's decorators.  
+Just mark a method inside `Controller with` `@Get` for instance.
+
+```ts
+// Controller
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
+  }
+}
+
+// Service
+@Injectable()
+export class UsersService {
+  findOne(id: string) {
+    return this.userRepository.findById(id);
+  }
+}
+
+// Repository
+@Injectable()
+export class UserRepository {
+  findById(id: string) {
+    return db.query('SELECT * FROM users WHERE id = $1', [id]);
+  }
+}
+```
+
+
 ## Dynamic Modules
 
 - **Dynamic modules** in NestJS allow configuring modules at runtime rather than compile-time
@@ -295,6 +353,43 @@ They run before the route method (e.g., controller) and can modify incoming data
 
 4. **Exception Handling Decorators (@Catch):**
   - Catches exceptions of a specified type in exception filters.
+
+### Custom decorators
+
+Used to abstract some business logic with data that we are working with.
+
+For instance, lets create a simple decorator to abstract out getting of `tenantId` 
+from the request payload.
+
+```ts
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+
+// Creating the decorator
+export const Tenant = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext): string | undefined => {
+    const request = ctx.switchToHttp().getRequest();
+    if (!request.user?.tenantId) {
+      throw new UnauthorizedException('Missing tenantId in user payload');
+    }
+
+    return request.user.tenantId;
+  },
+);
+
+// ... 
+
+// Then use this decorator like
+@Get('bookings')
+getBookings(@Tenant() tenantId: string) {
+  return this.bookingService.getByTenant(tenantId);
+}
+```
+
+Here is how Nest works with it:
+"When `getBookings()` is called, please call `Tenant()` decorator,  
+give me whatever it returns,  
+store it in a local variable called `tenantId`,
+and assume its type is `string`"
 
 ## NestJS tasks and questions
 
