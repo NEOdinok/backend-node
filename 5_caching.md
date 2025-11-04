@@ -147,3 +147,51 @@ A **"pool"** is a collection of **pre-established, ready-to-use connections**.
   - API reuses existing connections. Handles more requests with fewer open connections.
 
 > Tools: `PgBouncer`, `Pgpool-II`
+
+## Redis: Everyday Commands
+
+### Keys and expiration
+- `EXPIRE key seconds`: set TTL; auto-remove later (cache freshness).
+- `TTL key`: check remaining time; `-1` means no TTL.
+- `PERSIST key`: remove TTL; keep key forever.
+- `DEL key [key ...]`: delete cached value(s).
+- `EXISTS key`: check if a key is present.
+- `SCAN cursor [MATCH pattern] [COUNT n]`: iterate keys safely (avoid `KEYS`).
+
+### Strings and counters
+- `INCR key` / `DECR key`: atomic counters (rate limits, retries).
+- `INCRBY key n` / `DECRBY key n`: counters by step.
+- `MGET key1 key2` / `MSET k1 v1 k2 v2`: batch read/write multiple values.
+- `SETEX key ttl value`: set value with TTL in one go (cache item).
+  - Modern alternative: `SET key value EX ttl` (with options like `NX` for set-if-absent).
+
+### Hashes (objects/records)
+- `HSET key field value`: set a field (e.g., user fields).
+- `HGET key field`: read single field.
+- `HMGET key f1 f2`: read selected fields.
+- `HDEL key field [field ...]`: delete field(s).
+
+### Lists (queues, recent items)
+- `LPUSH key value` / `RPUSH key value`: push left/right.
+- `LPOP key` / `RPOP key`: pop from left/right.
+- `LRANGE key start stop`: read a slice (e.g., `0 9` for top 10).
+- `BRPOP key timeout`: blocking pop (simple worker queue).
+
+### Sets (unique membership)
+- `SADD key member [member ...]`: add unique items (tags, ids).
+- `SREM key member [member ...]`: remove items.
+- `SMEMBERS key`: list all members (use carefully for big sets).
+- `SCARD key`: set size.
+
+### Sorted sets (scores, rankings)
+- `ZADD key score member [score member ...]`: add/update with score.
+- `ZRANGE key start stop WITHSCORES`: read by rank (low→high).
+- `ZREVRANGE key start stop WITHSCORES`: read by rank (high→low).
+
+> 💡 Resis can be configured for pub/sub.`PUBLISH channel message` / `SUBSCRIBE channel`: lightweight notifications.
+
+📌 Common patterns, examples
+- Cache with TTL: `SETEX user:123 60 {json}`.
+- Cache-if-absent (and simple lock): `SET lock:job abc EX 10 NX`.
+- Rolling queue: `LPUSH q item`; worker uses `BRPOP q 5`.
+- Leaderboard: `ZADD lb 1200 user:42`; top 10 via `ZREVRANGE lb 0 9`.

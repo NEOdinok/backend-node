@@ -65,14 +65,39 @@ graph TD
 ## ✅ Acknowledgements (At-Least-Once Delivery)
 
 - **Manual ack**: `channel.ack(msg)`
-
   - Use for **critical operations** (e.g. orders, payments). Do the operation, then acknowledge
   - Set with: `{ noAck: false }` in `channel.consume(...)`
 
 - **Auto ack**: `{ noAck: true }`
-
   - Use for **non-critical data** (e.g. logs, metrics)
   - Message is treated as handled immediately upon delivery
+
+## ⏱️ Delayed Retries (Plugin)
+
+What if microservice is dead, message **fails to be acknowledged** and **infinitely keeps trying** ?
+
+Use the community plugin `rabbitmq_delayed_message_exchange` to retry messages with a delay.
+
+- Enable on the broker: `rabbitmq-plugins enable rabbitmq_delayed_message_exchange`.
+- Declare an exchange of type `x-delayed-message` with argument `x-delayed-type` (e.g., `direct`).
+- Publish with header `x-delay` in milliseconds. Broker delivers after the delay.
+
+**Tiny Example**
+```js
+const ch = await conn.createChannel();
+await ch.assertExchange('retry-ex', 'x-delayed-message', {
+  durable: true,
+  arguments: { 'x-delayed-type': 'direct' },
+});
+await ch.assertQueue('jobs', { durable: true });
+await ch.bindQueue('jobs', 'retry-ex', 'jobs');
+
+// publish with 5s delay
+ch.publish('retry-ex', 'jobs', Buffer.from(JSON.stringify({ id: 1 })), {
+  headers: { 'x-delay': 5000 },
+  persistent: true,
+});
+```
 
 ## 🗃️ RabbitMQ vs Kafka Persistence
 
