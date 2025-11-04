@@ -269,7 +269,7 @@ let y = 10;
 
 ## Copying Objects
 
-#### ✅ Shallow Copies
+### ✅ Shallow Copies
 
 - `Object.assign({}, obj)`
 - `{ ...obj }` (spread operator)

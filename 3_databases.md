@@ -925,7 +925,7 @@ Think **edit access** rules in Google Docs.
 
 Locks differ by their *behaviour* and *scale*
 
-#### 📏 Different types of lock scale
+### 📏 Different types of lock scale
 
 | Lock Type          | Description                                     |
 | ------------------ | ----------------------------------------------- |
@@ -933,7 +933,7 @@ Locks differ by their *behaviour* and *scale*
 | **Table-level**    | Locks the entire table (`LOCK TABLE users`)     |
 | **Database-level** | Locks entire DB (e.g., during backup/restore)   |
 
-#### 🧩 Pessimistic Locking behaviour
+### 🧩 Pessimistic Locking behaviour
 
 Assume conflict will happen
 
@@ -945,7 +945,7 @@ You “lock” a paragraph so others **can’t edit it** while you’re working.
 - Prevents race conditions.
 - **Slower** due to many locks.
 
-#### 🧩 Optimistic Locking behaviour
+### 🧩 Optimistic Locking behaviour
 
 Hope for the best
 
@@ -958,8 +958,6 @@ If yes, you get a **conflict warning**.
 - No locking during read
 - Conflict check before write
 - **Efficient but may rollback on conflict**
-
-#### 🎨
 
 ## Deadlocks
 

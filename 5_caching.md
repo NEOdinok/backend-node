@@ -107,7 +107,7 @@
 - PostgreSQL **automatically caches frequently accessed data and query results** using its internal memory structures.
 - The primary component for this is the **Shared Buffer Cache**.
 
-#### 🔧 **Configuration Example:**
+### 🔧 **Configuration Example:**
 
 ```plaintext
 shared_buffers = 1GB
