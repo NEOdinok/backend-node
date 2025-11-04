@@ -74,6 +74,43 @@ It creates it to be used as a *singleton* later.
 - `Dependency Injection` container in Nest reads metadata from `@Injectable()` 
 → to know what can be injected into what. -->
 
+### RxJS
+
+`RxJS` - *Reactive Extensions for JavaScript* — a library for working with asynchronous data streams.
+
+`Stream` is a sequence of values that arrive over time like:
+- *keystrokes* from a keyboard
+- *HTTP responses* arriving periodically
+- a *WebSocket* feed emitting data every secon
+
+`Observable` is an `RxJS` object that represents such a stream.
+It can emit:
+- `next` → a value
+- `error` → an error
+- `complete` → the end of the stream
+
+> 💡 `Stream` is a concept. `Observable` is `RxJS` implementation of it.
+
+Core principle:
+Instead of *“wait → callback → done”*, `RxJS` treats everything (values, promises, events, API responses) as a stream that can be observed and transformed over time.
+
+Here is how to subscribe and react to a stream:
+
+```ts
+import { Observable } from 'rxjs';
+
+const numbers$ = new Observable(subscriber => {
+  subscriber.next(1);
+  subscriber.next(2);
+  subscriber.complete();
+});
+
+numbers$.subscribe({
+  next: v => console.log('value:', v),
+  complete: () => console.log('done'),
+});
+```
+
 ## Advantages of Nest.js
 
 - **Structure:** Encourages organizing code into **modules, controllers, providers**, facilitating maintenance and scalability.
@@ -261,4 +298,4 @@ They run before the route method (e.g., controller) and can modify incoming data
 
 ## NestJS tasks and questions
 
-1. Refactoring Nest.js app:
+1. Refactoring Nest.js app: ... later
