@@ -62,13 +62,15 @@ graph TD
 
 > Durable messages `deliveryMode: 2` require durable queue to matter
 
-## ✅ Acknowledgements (At-Least-Once Delivery)
+## ✅ Acknowledgements 
 
 - **Manual ack**: `channel.ack(msg)`
+  - Used for `at-least-once`
   - Use for **critical operations** (e.g. orders, payments). Do the operation, then acknowledge
   - Set with: `{ noAck: false }` in `channel.consume(...)`
 
 - **Auto ack**: `{ noAck: true }`
+  - Used for `at-most-once`
   - Use for **non-critical data** (e.g. logs, metrics)
   - Message is treated as handled immediately upon delivery
 
@@ -143,8 +145,6 @@ ch.publish('retry-ex', 'jobs', Buffer.from(JSON.stringify({ id: 1 })), {
 - **Consumer (client)** only processes and acknowledgments messages.
 - **Simplifies client code**, **reduces the load** on the consumer.
 
-## RabbitMQ entities
-
 ## RabbitMQ Core Entities
 
 - **Exchange**  
@@ -174,10 +174,21 @@ ch.publish('retry-ex', 'jobs', Buffer.from(JSON.stringify({ id: 1 })), {
 - **Policy**  
   Policies let you apply configuration (e.g., TTL, mirroring) across many queues or exchanges at once—like building codes that apply to all apartments on a floor.
 
-## Delivery semantics
-- at-least-once
-- at-most-once
-- exactly-once (tricky)
+## 📬 Delivery Guarantees
+
+- **At-least-once**
+  - Broker keeps trying until it gets an ack. Requeue if consumer crashes
+  - Use with manual acknowledgements and idempotent handlers.  
+  - *Example*: order service rechecks "charge already done?" before charging again.
+- **At-most-once**
+  - Message is delivered zero or one time. If consumer dies mid-work, message is gone.
+  - Use with auto ack when losing a message is acceptable.
+  - *Example*: analytics counter for user action.
+- **Exactly-once**
+  - Goal: handle a message *just one time*, even if retries happen under the hood.
+  - Combine *at-least-once* delivery with idempotency.  
+  - *Example*: billing worker checks db for matching `idempotency key` or `transaction id`.  
+  Is this message processed already ?
 
 ## ⚔️ RabbitMQ vs Kafka
 

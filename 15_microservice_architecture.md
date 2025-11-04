@@ -51,9 +51,14 @@ Used in backend applications to distribute incoming traffic evenly across multip
 
 ## Interaction between microservices
 
-Synchronous call via HTTP/REST.  
-Asynchronous interaction through a message queue (e.g., RabbitMQ, Kafka).  
-Using API Gateway. Aggregation through BFF (Backends For Frontend).
+1. Synchronous call via *HTTP*.
+(*Simple*, but results in *tight compling*.)
+
+2. *Message queue* (e.g., `RabbitMQ`, `Kafka`).  
+(Almost always preferred nowdays. *Loose coupling*, but *eventual consistency*)
+
+3. *gRPC*
+(*Fastest*, uses `HTTP2`, but requieres setup and strict `.proto` schema)
 
 ## Security in MSA
 
@@ -276,8 +281,8 @@ A _Saga_ breaks a big operation (that touches multiple services) into smaller lo
 
 **Choreography vs Orchestration**
 
-- Choreography: (Kafka, RabbitMQ) Each service just reacts to events and sends out new events — like dancers following the rhythm without a central controller.
-- Orchestration: (Temporal, Zeebe, AWS Step Functions) A central "orchestrator" tells services when to do what — like a conductor in a music orchestra.
+- **Choreography**: (Kafka, RabbitMQ) Each service just reacts to events and sends out new events — like dancers following the rhythm without a central controller.
+- **Orchestration**: (Temporal, Zeebe, AWS Step Functions) A central "orchestrator" tells services when to do what — like a conductor in a music orchestra.
 
 > 💡 Choreography (event‑driven, decentralized coordination) is the more modern approach
 
@@ -665,6 +670,31 @@ class UserRegisteredEvent {
 | **Domain Service**  | `PaymentService`, `FareCalculationService` |
 | **Domain Event**    | `FlightBookedEvent`, `PaymentFailedEvent`  |
 | **Bounded Context** | `Booking`, `Search`, `Scheduling` services |
+
+## Event-Driven Design (EDD)
+
+**What it is (beginner view)**
+
+- 📣 Services communicate by emitting events: *"Something happened"* → others react.
+- Instead of direct calls like "do X now", a service says *what happened* and moves on.
+- Example: `OrderCreated` event that **Payment** and *Notification* services pick up.
+- Ways to make EDD : *WebHooks*, *Queues*
+
+**Core pieces (🧩)**
+```bash
+Product--(Event)--[Broker]--(Event)-->Consumer
+```
+
+**Can be in both styles:**
+- **Pub/Sub (topic)**: One event → **many subscribers** to a topic get a copy (fan‑out).
+- **Work Queue (competing consumers)**: One event → **exactly one** worker handles it.
+
+### Pros and Cons
+- ✅ Decouple teams/services; reduce tight, synchronous dependencies.
+- ✅ Fan‑out work (notify many services)
+- ✅ Smooth spikes (buffer in broker).
+- ✅ Async workflows and eventual consistency are acceptable.
+- ⚠️ Avoid for strict request/response or hard real‑time needs.
 
 ## Fallback (MSA)
 
