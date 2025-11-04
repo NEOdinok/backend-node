@@ -252,6 +252,54 @@ await Model.aggregate([{ $unwind: "$hobbies" }]);
 - `$sum`, `$avg`, `$min`, `$max`: Aggregates numbers.
 - `$project`: Picks specific fields to return from each document.
 
+## Aggregation: PostgreSQL vs MongoDB
+
+Keep it simple — most SQL clauses map to a MongoDB aggregation stage:
+
+- `WHERE` → `$match`
+- `SELECT col AS ...` → `$project`
+- `JOIN` → `$lookup` (left-outer join–like)
+- `GROUP BY + COUNT/SUM/AVG/...` → `$group` + `$sum/$avg/...`
+- `HAVING` → `$match` after `$group`
+- `ORDER BY` → `$sort`
+- `LIMIT / OFFSET` → `$limit` / `$skip`
+
+> 💡 `$lookup` is the Mongo way to “join” collections during reads.
+
+### Tiny example
+
+PostgreSQL (active users with at least 1 order, top 5 by count):
+
+```sql
+SELECT u.id, COUNT(o.id) AS orders
+FROM users u
+LEFT JOIN orders o ON o.user_id = u.id
+WHERE u.active = true
+GROUP BY u.id
+HAVING COUNT(o.id) > 0
+ORDER BY orders DESC
+LIMIT 5;
+```
+
+MongoDB (same idea via pipeline starting from `users`):
+
+```js
+db.users.aggregate([
+  { $match: { active: true } },
+  { $lookup: {
+      from: "orders",
+      localField: "_id",
+      foreignField: "user_id",
+      as: "orders"
+  }},
+  { $addFields: { ordersCount: { $size: "$orders" } } },
+  { $match: { ordersCount: { $gt: 0 } } },
+  { $project: { orders: 0 } },
+  { $sort: { ordersCount: -1 } },
+  { $limit: 5 }
+]);
+```
+
 ## Database Access and Tools in Node.js
 
 ### ORM (Object-Relational Mapping)
@@ -345,6 +393,34 @@ CREATE TABLE student_courses (
   PRIMARY KEY (student_id, course_id)
 );
 ```
+
+## Relationships: PostgreSQL vs MongoDB
+
+> 💡 TLDR: `PostgreSQL` ensures links with *FKs*; `MongoDB` models links with 
+embedded docs or stored `_id` references and resolves them via `$lookup` or separate queries.
+
+### PostgreSQL (foreign keys + joins)
+
+- Uses **foreign keys** to enforce referential integrity.
+- Reads combine data with **JOINs**; the planner uses indexes to keep it fast.
+- Supports cascade rules: `ON DELETE/UPDATE CASCADE | RESTRICT | SET NULL`.
+- Many-to-many is modeled via a **junction table** (two FKs, composite PK).
+
+### MongoDB (embed vs reference)
+
+- Uses two main patterns:
+  - **Embedded documents** (nested in parent)
+  - **References** (store another document's `_id`)
+- You can join at read time with **`$lookup`** in an aggregation pipeline.
+
+**When to embed**
+- One-to-few, data is **read together** most of the time.
+- Data **changes together**; keep a single write (atomic per document).
+
+**When to reference**
+- One-to-many with **unbounded growth** (`comments`, `events`, `logs`).
+- Many-to-many (`users ↔ roles`, `products ↔ categories`).
+- The same child is shared by many parents (avoid duplication).
 
 ## Normalization
 

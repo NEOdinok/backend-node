@@ -38,3 +38,4 @@ using "multiple people working with same google doc" example.
 - Do not overuse formatting. Only use it if appropriate and to highlight important stuff
 - Side notes like "> ..." are considered hits and should be started by either 💡, 📌 emojis or some other like red cross
   if you find it appropriate for this side note.
+
