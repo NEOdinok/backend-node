@@ -1,5 +1,79 @@
 # NestJS basics
 
+## Non-Nest.js things that are usefull to know beforehand
+
+### 🧩 TypeScript decorators
+
+*Decorator* in TS is a syntactic sugar for wrapping or annotating code
+
+> Decorators are still an *experimental* feature introduced in 2015.
+
+### 🔹 reflect-metadata (Reflect API)
+
+`Reflect API` (`Reflect.get,` `Reflect.apply,` etc) is is part of `ES6` and does not require to install anything.
+
+`reflect-metadata` is is an external NPM library. It extends `Reflect API` with metadata-specific  
+functions such as `getMetadata('key', target)`, `defineMetadata('key', value, target)` which are *not part of JS*
+
+```ts
+Reflect.defineMetadata('role', 'admin', User); // Stores "admin" as metadata under 'role' on the User class.
+
+const role = Reflect.getMetadata('role', User); // Retrieve value by 'role' on a User class
+console.log(role)// 'admin'
+```
+
+`Nest.js` relies on this to know *what* you've decorated.
+
+*Example:*
+
+```ts
+@Controller('users')
+export class UsersController {}
+```
+
+`Nest.js` internally uses Reflect.getMetadata() to learn that:
+- it’s a *controller*,
+- the route prefix is */users*,
+- what methods are decorated with `@Get()`, `@Post()`, etc
+
+### How Nest.js works with it
+
+Lets say you have this in you app:
+
+```ts
+@Injectable()
+export class UsersService {
+  findAll() {
+    return ['John', 'Jane', 'These', 'Are', 'Mocks'];
+  }
+}
+
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
+}
+```
+1. `@Injectable()` executes and makes UserService into something to be *craeted* and *injected*
+2. Nest's `DI Container` searches for classes with `@Injectsble()`, finds it and *registers* them as *providers*
+3. Then Nest sees `UsersController` has `UsersService` constructor parameter, checks metadata and finds out that `UserService` is injectable.
+It creates it to be used as a *singleton* later.
+4. Then nest injects `UserService` into Controller so that we can use `UserService` there without creating it.
+
+<!-- This is what happens behind the scenes:
+- *Decorator* executes and calls `Reflect.defineMetadata(...)` 
+→ stores info like `{ type: 'controller', path: 'users' }` on the class.
+
+- At runtime, when Nest starts, it scans your codebase and uses `Reflect.getMetadata(...)` 
+→ to discover `routes`, `guards`, `interceptors`, `dependencies`, etc.
+
+- `Dependency Injection` container in Nest reads metadata from `@Injectable()` 
+→ to know what can be injected into what. -->
+
 ## Advantages of Nest.js
 
 - **Structure:** Encourages organizing code into **modules, controllers, providers**, facilitating maintenance and scalability.
@@ -164,8 +238,6 @@ export class UsersController {
   - Log/enrich them
   - Return a custom HTTP response/body/headers.
 
-
-
 ## Pipes
 
 **Pipes** in NestJS are classes used for transforming or validating input data in your application.  
@@ -174,21 +246,18 @@ They run before the route method (e.g., controller) and can modify incoming data
 ## Key Decorators in NestJS
 
 1. **Class Decorators (@Controller, @Module, @Injectable):**
-
-   - `@Controller(path`)`: Defines the base path for all methods within the controller.
-   - `@Module({...})`: Defines a module that can contain providers, controllers, imports, and exports.
-   - `@Injectable()`: Marks a class as a provider that can be injected into other classes via the constructor.
+  - `@Controller(path`)`: Defines the base path for all methods within the controller.
+  - `@Module({...})`: Defines a module that can contain providers, controllers, imports, and exports.
+  - `@Injectable()`: Marks a class as a provider that can be injected into other classes via the constructor.
 
 2. **Method Decorators (@Get, @Post, @Put, @Delete, @Patch):**
-
-   - Define route handlers for the corresponding HTTP methods.
+  - Define route handlers for the corresponding HTTP methods.
 
 3. **Parameter Decorators (@Param, @Body, @Query, @Headers, @Req, @Res):**
-
-   - Extract route parameters, request body, query parameters, request headers, and provide the full request or response object.
+  - Extract route parameters, request body, query parameters, request headers, and provide the full request or response object.
 
 4. **Exception Handling Decorators (@Catch):**
-   - Catches exceptions of a specified type in exception filters.
+  - Catches exceptions of a specified type in exception filters.
 
 ## NestJS tasks and questions
 
