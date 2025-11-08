@@ -1088,6 +1088,8 @@ CREATE INDEX idx_email ON users (email);
 
 ### 2️⃣ **Composite Index (Multiple Columns)**
 
+> 💡 AKA compound index
+
 ```sql
 CREATE INDEX idx_status_amount ON orders (status, total_amount);
 ```
