@@ -532,7 +532,7 @@ Here composite key --> (StudentID, Course)
 | JOIN Type    | Concept        | What It Does                                                                   |
 | ------------ | -------------- | ------------------------------------------------------------------------------ |
 | `INNER JOIN` | 🔍 Filter      | Returns **only rows that have matching values in both tables**                 |
-| ``           | ➕ Expansion   | Returns **all rows from the left table**, and matching rows from the right     |
+| `LEFT JOIN`           | ➕ Expansion   | Returns **all rows from the left table**, and matching rows from the right     |
 | `RIGHT JOIN` | ➕ Expansion   | Returns **all rows from the right table**, and matching rows from the left     |
 | `FULL JOIN`  | 🌀 Combination | Returns **all rows when there is a match in one of the tables**, left or right |
 | `CROSS JOIN` | 🔁 Cartesian   | Returns **all possible combinations** of rows from both tables                 |
@@ -1179,6 +1179,43 @@ db.orders.createIndex({ status: 1, totalAmount: -1 });
 - Like PostgreSQL, **order matters**.
 - Index is only efficient if the **first field** (status) is in the filter condition.
 
+## PostgreSQL Join strageties
+
+`PostgreSQL` uses different join algorithms depending on
+- table size
+- indexes
+- cost estimation.
+
+We need to be aware of those to debug out why some *JOIN*s suddenly become slow.
+
+### 🔹 1. Nested Loop Join
+
+Good when:
+- Left table = small (e.g., 5 rows)
+- Right table = large but indexed
+
+**Real-life analogy:**
+You have a **short guest list** → for each name you look up their **phone number in a phonebook** using the index.
+
+### 🔹 2. Hash Join
+
+Good when:
+- Both tables *are large*
+- No usable index
+- Equality join `=`
+
+**Real-life analogy**
+You need to join "payments" table, each payment with `order_id` and orders table like so ```sql ... payment.order_id = order.id```
+
+### 🔹 3. Merge Join
+
+Good when:
+- Two sorted tables
+- Not yet sorted but sorting is cheap
+
+**Real-life analogy** 
+Two sorted customer lists → you run through each once, aligning matches.
+
 ## Planner
 
 Built in mechanism in **DBMS** that tells you an "execution plan" for your query before it runs.
@@ -1380,6 +1417,15 @@ EXECUTE FUNCTION notify_change();
 
 **Temporary Triggers** work until the end of session. Useful for debugging.
 
+
+## EXPLAIN ANALYZE
+
+This command shows:
+- Actual time of each step of a plan
+- Actual rows that has been handled
+- Number of loops
+
+> 💡 So it is a tree of steps that can be analyzed to find a bottleneck
 
 ## 💥 `EXPLAIN ANALYZE DROP DATABASE postgres`?
 
