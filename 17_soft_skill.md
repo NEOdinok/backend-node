@@ -1,8 +1,6 @@
 # ✨ Work Experience, Soft skills
 
-## 🇬🇧
-
-## ETG Experience (Booking Service)
+## ETG Experience (Booking Service) 🇬🇧
 
 Over the past 3 years at **ETG**, I helped transform a global flight booking system (used in 100+ countries, 200K → 300K active users/month).
 from a monolith into a **resilient microservice ecosystem**.
@@ -41,9 +39,7 @@ one-on-one meetings and as a result shortened onboarding time from 90 to 30 days
 
 I’m looking for a strong engineering team and impactful product. Happy to connect with the team as soon as possible.
 
-## 🇷🇺
-
-## Опыт в ETG (Booking Service)
+## Опыт в ETG (Booking Service) 🇷🇺
 
 Последние **3 года** я работал в ETG, Лондон, над глобальной системой бронирования, которая используется **в более чем 100 странах**.  
 Это высоконагруженный сервис с аудиторией более **250k активных пользователей в месяц**.
