@@ -9,13 +9,62 @@ It supports the **AMQP protocol**.
 RabbitMQ got the message and **consumer acknowledgements** that consumer got and processed the message.
 
 ```mermaid
-graph TD
-  App[Application] --> |"1 Establishes TCP"| Connection(Connection)
-  Connection --> |"2 Creates"| Channel(Channel)
-  Channel --> |"3 Publishes Message to"| Exchange(Exchange)
-  Exchange --> |"4 Routes based on Binding"| Queue(Queue)
-  Queue --> |"5 Delivers Message to"| Channel
-  Channel --> |"6 Consumes Message from"| App
+flowchart LR
+    %% 1. Define Subgraphs for the three environments
+    subgraph Producer_Side [Producer Environment]
+        direction TB
+        P_App([Producer App])
+        P_Conn[TCP Connection]
+        P_Chan[AMQP Channel]
+        
+        %% Internal Structure (Symmetric with Consumer now)
+        %% The Connection holds/contains the Channel
+        P_Conn -. contains .- P_Chan
+    end
+
+    subgraph Broker [RabbitMQ Broker]
+        direction TB
+        Ex{{Exchange}}
+        Q[("Queue")]
+
+        %% Internal Broker Routing
+        Ex -- 2. Routing --> Q
+    end
+
+    subgraph Consumer_Side [Consumer Environment]
+        direction TB
+        C_Chan[AMQP Channel]
+        C_Conn[TCP Connection]
+        C_App([Consumer App])
+
+        %% Internal Structure
+        %% The Connection holds/contains the Channel
+        C_Conn -. contains .- C_Chan
+    end
+
+    %% 2. Define the Lifecycle Flow (The Arrows)
+    
+    %% Publish Path
+    %% Producer App uses the Channel (inside the connection) to publish
+    P_App --> |1. basic.publish| P_Chan
+    P_Chan --> Ex
+
+    %% Consumption Path
+    %% Broker pushes to Channel, Channel delivers to App
+    Q --> |3. Push Message| C_Chan
+    C_Chan --> |4. Delivery Callback| C_App
+    
+    %% Acknowledgement Path
+    C_App -.-> |5. basic.ack| C_Chan
+
+    %% 3. Styling
+    classDef container fill:#f5f5f5,stroke:#333,stroke-dasharray: 5 5;
+    classDef rabbit fill:#ff6600,stroke:#333,color:white;
+    classDef app fill:#e1f5fe,stroke:#01579b;
+    
+    class Producer_Side,Consumer_Side container;
+    class Broker rabbit;
+    class P_App,C_App app;
 ```
 
 ### 🧭 RabbitMQ Workflow
@@ -29,10 +78,22 @@ graph TD
 
 ## 🧭 Exchange Types
 
-- **Direct** - (Default one) Routes to queue 
-- **Topic** - Pattern match (`*.error`, `user.*`)
-- **Fanout** - Broadcast to all queues
-- **Headers** Match on custom headers instead of keys
+**Direct** - (Default one) Routes to queue based on exact match on `routingKey` 
+
+**Topic** - Pattern match.  
+Better using an example:
+- `*` - exactly one word
+- `#` - zero or more words
+Given a published message with a routing key: `iphone.17.black`
+1) `iphone.*.black`   → match     (* matches "17")
+2) `iphone.#`         → match     (# matches "17.black")
+3) `samsung.#`        → mismatch  (different first word)  
+
+**Fanout** - Broadcast to all queues. Ignore the routing key.  
+
+**Headers** Match on custom headers instead of keys  
+
+> 💡 `iphone.*.black` is called binding pattern
 
 ## 🔁 Message Ordering
 
@@ -167,12 +228,6 @@ ch.publish('retry-ex', 'jobs', Buffer.from(JSON.stringify({ id: 1 })), {
 
 - **Message**  
   The actual letter you send: it carries a payload (body) and optional metadata (headers, routing key, TTL). Exchanges and queues handle messages.
-
-- **User & Permission**  
-  Users are like people with mailroom keys, and permissions control which vhosts/exchanges/queues they can access.
-
-- **Policy**  
-  Policies let you apply configuration (e.g., TTL, mirroring) across many queues or exchanges at once—like building codes that apply to all apartments on a floor.
 
 ## 📬 Delivery Guarantees
 
