@@ -1,4 +1,6 @@
-# RabbitMQ
+# Queues 
+
+## RabbitMQ
 
 > **AMQP** - Advanced Message Queuing Protocol. Built **on top of TCP**.
 
@@ -7,6 +9,38 @@ It supports the **AMQP protocol**.
 
 **Distributed task processing** - meaning that distributed system processes messages by **publisher confirmations** that
 RabbitMQ got the message and **consumer acknowledgements** that consumer got and processed the message.
+
+### RabbitMQ Core Entities
+
+- **Exchange**  
+  Think of an exchange like a post office sorter: it receives every incoming message and, based on rules, decides which queue(s) should get it.
+
+- **Queue**  
+  A queue is like your home mailbox: messages sit here until a consumer (you) comes by and picks them up.
+
+- **Binding**  
+  A binding is the address label that links an exchange to a queue. It tells the exchange, “If a message matches this pattern, deliver it to that queue.”
+
+- **Virtual Host (vhost)**  
+  A virtual host is like an apartment building with separate mailrooms: it provides isolated namespaces so multiple apps can use the same RabbitMQ server without stepping on each other’s messages.
+
+- **Connection**  
+  A connection is the TCP “phone line” between your application and the RabbitMQ broker. You usually open one per application instance.
+
+- **Channel**  
+  A channel is like an individual phone call on that line: it’s a lightweight, multiplexed session over a single connection. Best practice is to do most operations over channels rather than opening many connections.
+
+- **Message**  
+  The actual letter you send: it carries a payload (body) and optional metadata (headers, routing key, TTL). Exchanges and queues handle messages.
+
+### 🧭 RabbitMQ Workflow
+
+- `assertExchange` → create exchange
+- `assertQueue` → create queue
+- `publish` → send message to exchange with a routing key
+- `consume` → listen to messages from queue
+
+`amqplib` - node js package for rabbitmq
 
 ```mermaid
 flowchart LR
@@ -67,16 +101,7 @@ flowchart LR
     class P_App,C_App app;
 ```
 
-### 🧭 RabbitMQ Workflow
-
-- `assertExchange` → create exchange
-- `assertQueue` → create queue
-- `publish` → send message to exchange with a routing key
-- `consume` → listen to messages from queue
-
-`amqplib` - node js package for rabbitmq
-
-## 🧭 Exchange Types
+### 🧭 Exchange Types
 
 **Direct** - (Default one) Routes to queue based on exact match on `routingKey` 
 
@@ -95,13 +120,13 @@ Given a published message with a routing key: `iphone.17.black`
 
 > 💡 `iphone.*.black` is called binding pattern
 
-## 🔁 Message Ordering
+### 🔁 Message Ordering
 
 - ❌ **No by default**
 - Messages in a **single queue** are delivered in order
 - To ensure order: use **"one queue per consumer"** pattern. Each consumer processes messages from it's own queue
 
-## 📡 Channels in RabbitMQ
+### 📡 Channels in RabbitMQ
 
 **Channels** are virtual connections inside a single TCP connection to the RabbitMQ.
 
@@ -112,7 +137,7 @@ Given a published message with a routing key: `iphone.17.black`
 
 > ⚠️ It's important to never share a channel between producers and consumers. Always create separate channels for each logical responsibility.
 
-## 💾 Durable Messaging
+### 💾 Durable Messaging
 
 | Option                                 | Behavior                        |
 | -------------------------------------- | ------------------------------- |
@@ -123,7 +148,7 @@ Given a published message with a routing key: `iphone.17.black`
 
 > Durable messages `deliveryMode: 2` require durable queue to matter
 
-## ✅ Acknowledgements 
+### ✅ Acknowledgements 
 
 - **Manual ack**: `channel.ack(msg)`
   - Used for `at-least-once`
@@ -135,7 +160,7 @@ Given a published message with a routing key: `iphone.17.black`
   - Use for **non-critical data** (e.g. logs, metrics)
   - Message is treated as handled immediately upon delivery
 
-## ⏱️ Delayed Retries (Plugin)
+### ⏱️ Delayed Retries (Plugin)
 
 What if microservice is dead, message **fails to be acknowledged** and **infinitely keeps trying** ?
 
@@ -162,6 +187,22 @@ ch.publish('retry-ex', 'jobs', Buffer.from(JSON.stringify({ id: 1 })), {
 });
 ```
 
+## Kafka
+
+- **Producer** writes messages. May be idempotent that does not write duplicate messages
+- **Broker** - Kafka itself is dumb broker that ONLY stores and deliveres messages. Nothing more
+  - **Topic** - named stream of messages
+  - **Partition** - each topic is split into partitions. messages in partitions are in order
+- **Consumer** (or Consumer Group) - one (ones) who read messages. Handles all logic
+
+```sql
+Topic: payments
+ ├── Partition 0:  offset 0 1 2 3 4 ... --> consuemr 1
+ ├── Partition 1:  offset 0 1 2 3 4 ... --> consumer 2
+ └── Partition 2:  offset 0 1 2 3 4 ... --> consumer 3
+```
+> 💡 **One consumer** corresponds to **one partition**. Otherwise some consumers do nothing or consumers read multiple partitions
+
 ## 🗃️ RabbitMQ vs Kafka Persistence
 
 **RabbitMQ**:
@@ -173,8 +214,6 @@ ch.publish('retry-ex', 'jobs', Buffer.from(JSON.stringify({ id: 1 })), {
 - Designed for **message passing**, not long-term storage
 
 **Example:** Multiple workers consume tasks.
-
-**Kafka**:
 
 - Stores messages on disk for a **configurable retention period**
 - ✅ Consumers can **re-read** messages multiple times "Replayability"
@@ -206,29 +245,6 @@ ch.publish('retry-ex', 'jobs', Buffer.from(JSON.stringify({ id: 1 })), {
 - **Consumer (client)** only processes and acknowledgments messages.
 - **Simplifies client code**, **reduces the load** on the consumer.
 
-## RabbitMQ Core Entities
-
-- **Exchange**  
-  Think of an exchange like a post office sorter: it receives every incoming message and, based on rules, decides which queue(s) should get it.
-
-- **Queue**  
-  A queue is like your home mailbox: messages sit here until a consumer (you) comes by and picks them up.
-
-- **Binding**  
-  A binding is the address label that links an exchange to a queue. It tells the exchange, “If a message matches this pattern, deliver it to that queue.”
-
-- **Virtual Host (vhost)**  
-  A virtual host is like an apartment building with separate mailrooms: it provides isolated namespaces so multiple apps can use the same RabbitMQ server without stepping on each other’s messages.
-
-- **Connection**  
-  A connection is the TCP “phone line” between your application and the RabbitMQ broker. You usually open one per application instance.
-
-- **Channel**  
-  A channel is like an individual phone call on that line: it’s a lightweight, multiplexed session over a single connection. Best practice is to do most operations over channels rather than opening many connections.
-
-- **Message**  
-  The actual letter you send: it carries a payload (body) and optional metadata (headers, routing key, TTL). Exchanges and queues handle messages.
-
 ## 📬 Delivery Guarantees
 
 - **At-least-once**
@@ -242,23 +258,13 @@ ch.publish('retry-ex', 'jobs', Buffer.from(JSON.stringify({ id: 1 })), {
 - **Exactly-once**
   - Goal: handle a message *just one time*, even if retries happen under the hood.
   - Combine *at-least-once* delivery with idempotency.  
-  - *Example*: billing worker checks db for matching `idempotency key` or `transaction id`.  
-  Is this message processed already ?
+  - *Example*: billing worker checks db for matching `idempotency key` or `transaction id`. Is this message processed already ?
 
 ## ⚔️ RabbitMQ vs Kafka
 
 > 💡 In *Kafka* **Offset** = the unique, incremental position number of each message inside a Kafka **partition**.
 > 💡 Kafka **topic** (which you might think of as “a queue”) is split into multiple **partitions** for scalability and parallelism.
 
-**Kafka** looks like this:
-
-```sql
-Topic: payments
- ├── Partition 0:  offset 0 1 2 3 4 ...
- ├── Partition 1:  offset 0 1 2 3 4 ...
- └── Partition 2:  offset 0 1 2 3 4 ...
-
-```
 | Feature           | RabbitMQ                                                     | Kafka                                                              |
 | :---------------- | :----------------------------------------------------------- | :----------------------------------------------------------------- |
 | **Broker Type**   | **Smart Broker**: Manages message routing, queuing, and delivery logic (pushes messages to consumers). | **Dumb Broker (Log-based)**: Simple, immutable log of messages. Consumers pull messages and manage their own state (offsets). |

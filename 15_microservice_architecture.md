@@ -449,6 +449,36 @@ Step 4: Marks it as sent
 - You must clean up the Outbox table regularly
 - Need retry, deduplication, and error handling logic
 
+## Transactional inbox
+
+The goal of it is don't run the **business logic twice** on the same message
+
+When consuming a message:
+- Start DB transaction
+- Check if `message_id` already exists in `inbox` table
+- If yes → skip processing
+- If no →
+  - save `message_id` to `inbox_table`
+  - execute business logic
+- Commit DB transaction
+- Then:
+  - Kafka: commit offset
+  - RabbitMQ - `ack`
+
+Why this is useful for RabbitMQ as well
+
+Scenario without inbox (problem):
+
+- RabbitMQ delivers message `payment_id=123` to consumer
+- Consumer runs DB update: `payments.status = "paid"` ✅
+- Consumer calls external payment API and charges customer ✅
+- Consumer **crashes before sending ack** ❌
+- RabbitMQ thinks: “not acknowledged” → re-delivers the same message
+- Consumer receives it again and charges customer again ❌❌
+
+RabbitMQ did its job: it prevented message loss.
+But you still got **duplicate business execution**
+
 ## Event Sourcing
 
 Instead of saving the current **state** of something (e.g., "Balance = $500"),
