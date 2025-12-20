@@ -1,5 +1,17 @@
 # ✅ Testing
 
+## Types of tests
+
+| Test type   | What it checks             |
+| ----------- | -------------------------- |
+| Unit        | Small function works       |
+| Integration | Services work together     |
+| E2E         | Full user flow             |
+| Load        | System under pressure      |
+| Smoke**     | System is alive at all     |
+
+- `Smoke` testing is a quick post-deploy check to ensure the system is basically working. No logic or in-depth testing. `/health` returns 200, `/login` responds, DB connection works
+
 ## 🔍 Mocking in Node.js
 
 - **Stub** - Object that returns **predefined responses** to function calls. They are used to isolate test from external dependencies.

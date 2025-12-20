@@ -40,7 +40,13 @@
 - `Terraform` - Infrastructure as service "I want 2 servers, 1 queue, connected like this". Used with AWS, GCP, Azure
 - `Lambda` (AWS) - Serverless function. Runs only when triggered, stateless, needs no dedicated always-on server.
 - `Edge-function` - Lambda that runs georgraphically closest to you.
+- `Kinesis` (AWS) - collect, process, analyze logs, clicks (large data **streams**)
 
+## Deployment strategies
+
+- `Canary Release` - Deploy new version to small % of users first. `1%`, then `5%` and if something breaks, roll back.
+- `Blue / Green` - There are two environments: `Blue` (current), `Green` (new one)
+- `Rolling deployment` - update servers one by one (often in K8S) so that users dont notice downtime.
 
 
 

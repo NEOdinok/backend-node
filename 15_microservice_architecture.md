@@ -49,6 +49,99 @@ Used in backend applications to distribute incoming traffic evenly across multip
 - **Dead letter exchange (DLX)** - If a message fails (rejected or expired), RabbitMQ can move it to a DLX.  
   Then it can retry later (with a delay), or log it for debugging.
 
+## gRPC
+
+**RPC** - Remote Procedure Call.  
+A fast way for one service to call a function in another service, as if it was local — but over the network.  
+“Hey BookingService, run calculatePrice() and send me the result.”
+
+**Advantages:**
+
+- **HTTP/2** for speed (better than HTTP/1.1 used by REST)
+  - Simple and fast bi-directional data streaming.
+- **Protobuf** instead of JSON (smaller, faster, strongly typed)
+  - Binary format instead of text. Transmits and compresses faster.
+- **Supports many Programming Languages** In a proto file, we specify what's on input, output, and get protoc code generation for any language.
+- **Deadlines/Timeouts:** gRPC allows setting timeouts for each call.
+- **Request Cancellation:** gRPC supports client-side request cancellation.
+
+**Consul** - Service discovery and configuration tool. Consul is a binary standalone app that runs on its own machine.  
+Services register themselves in Consul to discover who is running and where
+It allows for:
+
+- Registering services.
+- Discovering services.
+- Health checking.
+- Optionally: key-value store, DNS or HTTP APIs
+
+**Protobuf**
+A binary format, easy to compress efficiently, strict typing. (ALL OF THIS AS OPPOSED to JSON, where you can pass different data types in one field in different cases).  
+In case of Protobuf the server must first serialize the data into Protobuf, and the client must deserialize it.
+
+Protobuf in practice:
+
+- Define a service in .proto file (API contract)
+- Generate code (client and server stubs)
+- Implement service in code
+- Implement client in code
+
+**Important note on .proto**
+- `.proto` file defines a strict schema
+- Must live in a shared repo or central registry
+- Client code should be auto-generated, not handwritten
+
+
+**.proto file**:
+
+```proto
+syntax = "proto3";
+
+package flights;
+
+message FlightSearchRequest {
+  string fromLocation = 1;
+  string toLocation = 2;
+}
+
+message FlightSearchResponse {
+  repeated string flightNumbers = 1;
+}
+
+service FlightService {
+  rpc SearchFlights(FlightSearchRequest) returns (FlightSearchResponse);
+}
+```
+
+**Real-life implementations**
+
+- **Search Service + Schedule Service**
+
+  - Real-time search with fresh schedule data
+  - Fast responses
+  - Could use server-streaming to get a stream of results.
+
+- **Booking Service + Pricing Service** .
+  - Up-to date price is crucial when booking.
+  - No need for RabbitMQ because we need instant price update
+
+```
+Client (frontend)
+  ↓
+API Gateway / BFF
+  ↓
+gRPC call to Booking Service
+  ↓
+gRPC call to Pricing Service
+  ↓
+Booking response sent back
+```
+
+### 🛡️ Why gRPC is internal-only
+
+- Uses *binary format* (hard for browsers to consume)
+- No *CORS*, *caching*, *auth* or *versioning* built-in
+- Technically possible to expose externally (via gRPC-Web, Envoy), but **bad practice**
+
 ## Interaction between microservices
 
 1. Synchronous call via *HTTP*.
@@ -143,99 +236,6 @@ BFF or Microservices
 > 💡 **Role-Base Access Control (RBAC)** - restrict access based on user roles. Example: 'admin' - full access, 'user' - read only.
 
 > 💡 **Network Policies** - K8S YAML file that defines "Who can talk to whom over the network".
-
-## gRPC
-
-**RPC** - Remote Procedure Call.  
-A fast way for one service to call a function in another service, as if it was local — but over the network.  
-“Hey BookingService, run calculatePrice() and send me the result.”
-
-**Advantages:**
-
-- **HTTP/2** for speed (better than HTTP/1.1 used by REST)
-  - Simple and fast bi-directional data streaming.
-- **Protobuf** instead of JSON (smaller, faster, strongly typed)
-  - Binary format instead of text. Transmits and compresses faster.
-- **Supports many Programming Languages** In a proto file, we specify what's on input, output, and get protoc code generation for any language.
-- **Deadlines/Timeouts:** gRPC allows setting timeouts for each call.
-- **Request Cancellation:** gRPC supports client-side request cancellation.
-
-**Consul** - Service discovery and configuration tool. Consul is a binary standalone app that runs on its own machine.  
-Services register themselves in Consul to discover who is running and where
-It allows for:
-
-- Registering services.
-- Discovering services.
-- Health checking.
-- Optionally: key-value store, DNS or HTTP APIs
-
-**Protobuf**
-A binary format, easy to compress efficiently, strict typing. (ALL OF THIS AS OPPOSED to JSON, where you can pass different data types in one field in different cases).  
-In case of Protobuf the server must first serialize the data into Protobuf, and the client must deserialize it.
-
-Protobuf in practice:
-
-- Define a service in .proto file (API contract)
-- Generate code (client and server stubs)
-- Implement service in code
-- Implement client in code
-
-**Important note on .proto**
-- `.proto` file defines a strict schema
-- Must live in a shared repo or central registry
-- Client code should be auto-generated, not handwritten
-
-
-**.proto file**:
-
-```proto
-syntax = "proto3";
-
-package flights;
-
-message FlightSearchRequest {
-  string fromLocation = 1;
-  string toLocation = 2;
-}
-
-message FlightSearchResponse {
-  repeated string flightNumbers = 1;
-}
-
-service FlightService {
-  rpc SearchFlights(FlightSearchRequest) returns (FlightSearchResponse);
-}
-```
-
-**Real-life implementations**
-
-- **Search Service + Schedule Service**
-
-  - Real-time search with fresh schedule data
-  - Fast responses
-  - Could use server-streaming to get a stream of results.
-
-- **Booking Service + Pricing Service** .
-  - Up-to date price is crucial when booking.
-  - No need for RabbitMQ because we need instant price update
-
-```
-Client (frontend)
-  ↓
-API Gateway / BFF
-  ↓
-gRPC call to Booking Service
-  ↓
-gRPC call to Pricing Service
-  ↓
-Booking response sent back
-```
-
-### 🛡️ Why gRPC is internal-only
-
-- Uses *binary format* (hard for browsers to consume)
-- No *CORS*, *caching*, *auth* or *versioning* built-in
-- Technically possible to expose externally (via gRPC-Web, Envoy), but **bad practice**
 
 ## CAP Theorem
 
