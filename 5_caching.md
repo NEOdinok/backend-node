@@ -150,43 +150,53 @@ A **"pool"** is a collection of **pre-established, ready-to-use connections**.
 
 ## Redis: Everyday Commands
 
-### Keys and expiration
-- `EXPIRE key seconds`: set TTL; auto-remove later (cache freshness).
-- `TTL key`: check remaining time; `-1` means no TTL.
-- `PERSIST key`: remove TTL; keep key forever.
-- `DEL key [key ...]`: delete cached value(s).
-- `EXISTS key`: check if a key is present.
-- `SCAN cursor [MATCH pattern] [COUNT n]`: iterate keys safely (avoid `KEYS`).
+- `SET`, `GET` Basic key-value storage
+```
+SET user:1 "Alex"
+GET user:1 -> "Alex"
+```
 
-### Strings and counters
-- `INCR key` / `DECR key`: atomic counters (rate limits, retries).
-- `INCRBY key n` / `DECRBY key n`: counters by step.
-- `MGET key1 key2` / `MSET k1 v1 k2 v2`: batch read/write multiple values.
-- `SETEX key ttl value`: set value with TTL in one go (cache item).
-  - Modern alternative: `SET key value EX ttl` (with options like `NX` for set-if-absent).
+- `HSET` (Hashes) Store object-like structure
+```
+HSET user:1 name "Alex"
+HSET user:1 age "24"
 
-### Hashes (objects/records)
-- `HSET key field value`: set a field (e.g., user fields).
-- `HGET key field`: read single field.
-- `HMGET key f1 f2`: read selected fields.
-- `HDEL key field [field ...]`: delete field(s).
+HGET user:1 name -> "Alex"
+```
 
-### Lists (queues, recent items)
-- `LPUSH key value` / `RPUSH key value`: push left/right.
-- `LPOP key` / `RPOP key`: pop from left/right.
-- `LRANGE key start stop`: read a slice (e.g., `0 9` for top 10).
-- `BRPOP key timeout`: blocking pop (simple worker queue).
+- `SETs` **unique unordered** values
+```
+SADD online_users 1 2 3
+SADD online_users 2   # ignored (already exists)
 
-### Sets (unique membership)
-- `SADD key member [member ...]`: add unique items (tags, ids).
-- `SREM key member [member ...]`: remove items.
-- `SMEMBERS key`: list all members (use carefully for big sets).
-- `SCARD key`: set size.
+SMEMBERS online_users -> {1,2,3}
+```
 
-### Sorted sets (scores, rankings)
-- `ZADD key score member [score member ...]`: add/update with score.
-- `ZRANGE key start stop WITHSCORES`: read by rank (low→high).
-- `ZREVRANGE key start stop WITHSCORES`: read by rank (high→low).
+- `Sorted sets` Set + score
+`-1` - last elemtnt
+`-2` - second from the end
+`ZREVRANGE` - range in reverce order
+```
+ZADD leaderboard 100 user1
+ZADD leaderboard 200 user2
+ZADD leaderboard 150 user3
+
+ZREVRANGE leaderboard 0 1 - user2, user3
+```
+
+- `Pub/Sub` Lightweight messaging
+```
+SUBSCRIBE orders
+PUBLISH orders "order_created"
+```
+
+- `WATCH` / `WATCH2` Optimistic locking. Abort if someone accesses while i'm executing
+```
+WATCH balance
+GET balance
+SET balance 90
+EXEC
+```
 
 > 💡 Resis can be configured (though not widely used) for pub/sub. `PUBLISH channel message` / `SUBSCRIBE channel`: lightweight notifications.
 
