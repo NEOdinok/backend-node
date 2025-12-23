@@ -48,6 +48,56 @@
 - `Blue / Green` - There are two environments: `Blue` (current), `Green` (new one)
 - `Rolling deployment` - update servers one by one (often in K8S) so that users dont notice downtime.
 
+## Devops
+
+Понимать что такое:
+
+**K8S**
+
+вот так должно выглядеть запущенное приложение (столько подов тут, там) 
+
+**Terraform**
+
+какая вообще инфра есть. Создает кластеры внутри GCP / AWS
+
+**Help charts**
+
+Настройки для разных окружений (кол-во подов, env, версии образов, и тд.)
+```
+my-backend/
+  Chart.yaml --> passport of a chart
+  values.yaml --> main settings (changed often)
+  templates/
+    deployment.yaml --> k8s template with placeholders for values from values.yaml
+    service.yaml --> 
+```
+
+Helm чарты пишут руками либо берут готовые для:
+- БД
+- Redis
+- Kafka
+- Prometheus
 
 
+**Терминология:**
+- Pod - запущенный инстанс приложения (умирают, пересоздаются)
+- Deployment - упралвяет подами (скока нужно, версия image, как обновлять)
+- Service (сетевой объект) - тк поды умирают/создаются, нужен стабильынй service. он принимает запросы, роутит на подыё
+- configMap / secrets - env для конфига и секретов соответственно
+- Ingress - без него прила была бы доступна только в кластере. принимает HTTP, делает TLS, роутит на реальные сервисы
 
+```
+Твой код
+ ↓
+Dockerfile
+ ↓
+Docker image
+ ↓
+Deployment (сколько инстансов)
+ ↓
+Pod (реальный процесс)
+ ↓
+Service (внутренний адрес)
+ ↓
+Ingress (доступ извне)
+```
