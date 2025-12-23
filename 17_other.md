@@ -6,7 +6,7 @@
 - DDoS
 - Unauthorized requests
 
-### Basic api security
+### Basic app security
 
 *Gateway (Nginx) level*
 - `limit_req` (RPS for IP)

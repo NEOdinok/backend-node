@@ -4,56 +4,39 @@
 
 ---
 
-### ✅ **Cache-Aside (Look-Aside)**
+### (Read) Cache-Aside
 
-- **How It Works:**
-  1. App checks the cache.
-  2. Cache Hit ➔ Return data.
-  3. Cache Miss ➔ Load from DB, store in cache, return data.
-- **Who Controls Cache:** Application code.
-- **Example:**
-  - User profile data cached in Redis.
-  - Key: `user:123`, if not found, load from DB and cache it.
-- **Use Case:** Read-heavy apps, API responses, product details.
+1. **App controls** the cache. Cache invalidation is **your responsibility**
+2. Cache Hit ➔ return data.
+3. Cache Miss ➔ query DB, **store in cache**, return result
+
+**Most common** in real **read-heavy**: user profiles, catalogs, settings
 
 ---
 
-### 💤 **Lazy Caching (Read-Through Caching)**
+### (Read) Read-Through
 
-- **How It Works:**
-  1. Cache system checks for data.
-  2. Cache Miss ➔ Cache system loads from DB, stores it, returns data.
-- **Who Controls Cache:** Cache system (like a library or middleware).
-- **Example:**
-  - Using a caching library that automatically fetches from DB if key missing.
-- **Use Case:** Simple scenarios where TTL (Time To Live) is important (e.g., product prices).
+1. **Cache layer controls** the cache. App **never talks to DB**, caching layer is a proxy
+2. Cache Hit ➔ return data.
+3. Cache Miss ➔ **cache itself** queries DB, stores data, returns result
+
+**Much less common** in simple apps, less customization
+---
+
+### (Write) Write-Through
+
+1. App writes to DB and cache at **the same time**
+3. Only after **both succeed** write is complete
+
+**Cache is consistent**. Used in finance, inventory, when **stale data is unecceptable**. Writes are slow
 
 ---
 
-### ✍️ **Write-Through**
+### (Write) Write-behind
+1. App **writes to cache first**
+2. Background worker writes data to DB
 
-- **How It Works:**
-  1. Write data to **cache AND database immediately**.
-- **Pros:** Strong data consistency.
-- **Cons:** Slower writes.
-- **Example:**
-  - Updating product stock ➔ Write to Redis and PostgreSQL at the same time.
-- **Use Case:** Banking systems, inventory management.
-
----
-
-### 📝 **Write-Behind (Write-Back)**
-
-- **How It Works:**
-  1. Write data to cache.
-  2. Add to a queue for later DB write.
-  3. Background job writes data to DB.
-- **Pros:** Fast writes.
-- **Cons:** Risk of data loss if failure before DB write.
-- **Example:**
-  - Save user analytics events to Redis, push to queue.
-  - Background job (like node-cron) writes batch events to PostgreSQL.
-- **Use Case:** Logging, analytics, non-critical data.
+**Cache is eventually consistent**, writes are fast
 
 ## 📊 **Summary Table**
 
