@@ -902,11 +902,9 @@ Each **person editing** is like a **transaction**.
 The **Google Doc** is your **database**.  
 The **text you're editing** is the **data**.
 
-### Isolation levels (from least to most strict)
-
 ---
 
-### 1️⃣ **Read Uncommitted** (🚫 Not actually used in PostgreSQL)
+###  1️⃣ Read Uncommitted (🚫 Not actually used in PostgreSQL)
 
 **Google Docs analogy**:  
 You're watching another user type in real time—even if they haven't saved their changes yet.
@@ -922,7 +920,7 @@ You're watching another user type in real time—even if they haven't saved thei
 
 ---
 
-### 2️⃣ **Read Committed** (🔁 Default in PostgreSQL)
+### 2️⃣ Read Committed (🔁 Default in PostgreSQL)
 
 **Google Docs analogy**:  
 You only see **what was saved** (committed) live _before each action you do_.
@@ -938,7 +936,7 @@ You only see **what was saved** (committed) live _before each action you do_.
 
 ---
 
-### 3️⃣ **Repeatable Read** (🧊 Snapshot of your session)
+### 3️⃣ Repeatable Read (🧊 Snapshot of your session)
 
 **Google Docs analogy**:  
 Once you open the doc, you get a **frozen snapshot** of it.
@@ -953,7 +951,7 @@ Once you open the doc, you get a **frozen snapshot** of it.
 
 ---
 
-### 4️⃣ **Serializable** (📦 Strictest, safest)
+### 4️⃣ Serializable (📦 Strictest, safest)
 
 **Google Docs analogy**:  
 You're the **only one allowed to edit** for now.  
