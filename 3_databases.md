@@ -89,6 +89,8 @@ The two main approaches are **Sharding** and **Replication**.
 - Cross-shard queries become harder.
 - Requires a good sharding key to avoid data imbalance.
 
+> 💡 **Sharding key** decides which partition request goes to so a **good sharding key** is `user_id`. Bad choise would be `created_at` since all new queries would go into one partition.
+
 ### 🔹 Replication (Master-Slave Model)
 
 - One **Master** handles all **write operations**.
@@ -1073,9 +1075,16 @@ With an index:
 | SP-GiST | 🧭 Supports non-balanced trees, advanced use cases        |
 | GIN     | 📚 Good for indexing arrays, JSONB, and full-text search  |
 | BRIN    | 📦 Efficient for large, ordered tables (e.g. time series) |
-> 💡 JSONB — a special PostgreSQL data type that stores JSON in binary form, allowing efficient search, filtering, and indexing without requiring a fixed schema.### 🔧 How to Create Indexes
 
-### 1️⃣ **Single Column**
+> 💡 **JSONB** — a special PostgreSQL data type that stores JSON in binary form, allowing efficient search, filtering, and indexing without requiring a fixed schema.
+
+> 💡 **B-tree** is a *balanced* tree, NOT binary tree. Complexity of search through it is `O(log N)`
+
+> 💡 Index does not make sense with **low-cardinality** such as sex male / female where each value still matches ~50% of table. Index helps when you skip large portion of rows. 
+
+### 🔧 How to Create Indexes
+
+1️⃣ **Single Column**
 
 ```sql
 CREATE INDEX idx_email ON users (email);
@@ -1084,9 +1093,9 @@ CREATE INDEX idx_email ON users (email);
 - Creates B-tree **by default**. Most common index
 - Improves filtering, sorting, and joining on that column, `=`, `<`, `>`, `BETWEEN`, and `ORDER BY`
 
-### 2️⃣ **Composite Index (Multiple Columns)**
+2️⃣ **Composite Index (compound index)**
 
-> 💡 AKA compound index
+For multiple columns
 
 ```sql
 CREATE INDEX idx_status_amount ON orders (status, total_amount);
@@ -1102,7 +1111,7 @@ CREATE INDEX idx_status_amount ON orders (status, total_amount);
 
 > 💡 Think of it an address book sorted by **last name** first, then **first name**. You can't efficiently look it up by just **first name**.
 
-### 3️⃣ Unique Index
+3️⃣ **Unique Index**
 
 ```sql
 CREATE UNIQUE INDEX idx_unique_email ON users (email);
@@ -1115,7 +1124,7 @@ Use cases:
 
 - Enforce uniqueness for username, email, phone, etc.
 
-### 4️⃣ Expression-based Index
+4️⃣ **Expression-based Index**
 
 ```sql
 CREATE INDEX idx_lower_email ON users (LOWER(email));
@@ -1131,7 +1140,7 @@ Use case:
 SELECT * FROM users WHERE LOWER(email) = 'example@mail.com';
 ```
 
-### 5️⃣ Partial Index
+5️⃣ **Partial Index**
 
 ```sql
 CREATE INDEX idx_large_orders ON orders (total_amount) WHERE total_amount > 1000;
