@@ -583,12 +583,11 @@ Instead of thinking “controllers → services → DB".
 **DDD** says:  
 “Let’s model the real-world business domain clearly in code.
 
-**DDD building blocks:**
+### DDD building blocks:
 
-1. **Entities**
+1. **Entity**
 
-- Have a unique ID
-- Change over time
+- Something **with id** that changes over time
 - Examples: User, Flight, Booking
 
 ```ts
@@ -600,7 +599,7 @@ class User {
 }
 ```
 
-2. **Value Objects**
+2. **Value Object**
 
 - Defined only by their value
 - No unique ID
@@ -626,44 +625,95 @@ class Order {
   }
 
   addItem(item) {
-    this.items.push(item); // item is a Value Object
+    this.items.push(item); 
   }
 }
 ```
 
+- Has **It's own id**
 - A cluster of entities/value objects that are treated as a unit.
 - Has a **single root** (aggregate root) that controls access.  
-  `const order = new Order();`
+`const order = new Order();`
 - All changes must go through the root to maintain **data integrity**.  
-  `order.addItem(item);` - correct  
-  `order.items.push(item)` - incorrect. Outside the aggregate
+`order.addItem(item);` - correct  
+`order.items.push(item)` - incorrect. Outside the aggregate
 
 4. **Repositories**
 
+- **Only** works with Aggregates. Not with entities, not with value objects.
 - **Hide DB logic** — provide access to aggregates/entities
 - Think: "Give me Order 123", or "Save this User"
 
 ```ts
-class UserRepository {
-  findById(id) {
-    // fetch from DB
-  }
+// suppose we have a User aggregate
+export class User {
+  constructor(
+    public readonly id: string,
+    public email: string,
+  ) {}
 
-  save(user) {
-    // persist to DB
+  changeEmail(newEmail: string) {
+    this.email = newEmail;
   }
+}
+
+// Repository interface in domain layer
+export interface UserRepository {
+  findById(id: string): Promise<User | null>;
+  findByEmail(email: string): Promise<User | null>;
 }
 ```
 
 5. **Domain Services**
 
-- **Business logic that doesn't fit cleanly** inside one entity.
-- Usually work **across multiple entities**.
+- If logic **naturally belongs to aggregate** --> leave it there
+- If logic **spans multiple aggregates** --> domain service
 
 ```ts
-class AuthenticationService {
-  verifyUser(credentials) {
-    // Check password, generate token, etc.
+// User aggregate
+export class User {
+  constructor(
+    public readonly id: string,
+    public email: string,
+  ) {}
+
+  // belongs to User aggregate
+  changeEmail(newEmail: string) {
+    this.email = newEmail;
+  }
+}
+```
+
+```ts
+export interface UserRepository {
+  findByEmail(email: string): Promise<User | null>;
+}
+
+export interface PasswordHasher {
+  verify(password: string, hash: string): Promise<boolean>;
+}
+
+export interface TokenService {
+  issueToken(payload: { userId: string }): string;
+}
+
+// Authentication domain service 
+export class AuthenticationService {
+  constructor(
+    private readonly users: UserRepository,
+    private readonly hasher: PasswordHasher,
+    private readonly tokens: TokenService,
+  ) {}
+
+  // Does a lot of things: user, hash, tokens, etc. Does not fit inth User aggregate
+  async verifyUser(credentials: { email: string; password: string }) {
+    const user = await this.users.findByEmail(credentials.email);
+
+    const ok = await this.hasher.verify(credentials.password, user);
+
+    const token = this.tokens.issueToken({ userId: user.id });
+
+    return token;
   }
 }
 ```
@@ -685,11 +735,12 @@ class UserRegisteredEvent {
 7. **Bounded Contexts**
 
 - A **boundary around a part of the system** where terms, logic, and models have a specific meaning
-- Each microservice is often its **own bounded context**
+- Booking context, Pricing context etc. 
+- Microserivces **often map 1:1 to bounded context** but DDD does not enforce microservices.
 
 > 🚧 Models/terms inside one context don’t leak into another.
 
-**✈️ DDD Airline Service Example**
+### DDD Travel-tech service example
 
 | **DDD Concept**     | **Airline Example**                        |
 | ------------------- | ------------------------------------------ |
